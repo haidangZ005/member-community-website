@@ -8,6 +8,7 @@ const makeDependencies = require('./factories/makeDependencies');
 const makeUseCases = require('./factories/makeUseCases');
 const makeAuthController = require('../interfaces/http/controllers/AuthController');
 const makeUserController = require('../interfaces/http/controllers/UserController');
+const makePostController = require('../interfaces/http/controllers/PostController');
 const makeAuthMiddleware = require('../interfaces/http/middlewares/authMiddleware');
 const errorHandler = require('../interfaces/http/middlewares/errorHandler');
 const makeRoutes = require('../interfaces/http/routes');
@@ -28,6 +29,7 @@ function createApp(overrides = {}) {
   app.use('/api', makeRoutes({
     authController: makeAuthController(useCases),
     userController: makeUserController(useCases),
+    postController: makePostController(useCases, dependencies),
     authMiddleware: makeAuthMiddleware(tokenService),
   }));
   app.use((_req, res) => res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Không tìm thấy endpoint' } }));
@@ -36,4 +38,3 @@ function createApp(overrides = {}) {
 }
 
 module.exports = createApp;
-

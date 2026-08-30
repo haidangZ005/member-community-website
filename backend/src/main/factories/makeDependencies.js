@@ -4,6 +4,10 @@ const PostgresPasswordResetTokenRepository = require('../../infrastructure/datab
 const BcryptHashService = require('../../infrastructure/services/BcryptHashService');
 const JwtTokenService = require('../../infrastructure/services/JwtTokenService');
 const NodemailerEmailService = require('../../infrastructure/services/NodemailerEmailService');
+const PostgresPostRepository = require('../../infrastructure/database/postgres/repositories/PostgresPostRepository');
+const PostgresCommentRepository = require('../../infrastructure/database/postgres/repositories/PostgresCommentRepository');
+const PostgresLikeRepository = require('../../infrastructure/database/postgres/repositories/PostgresLikeRepository');
+const PostgresCategoryRepository = require('../../infrastructure/database/postgres/repositories/PostgresCategoryRepository');
 
 function makeDependencies() {
   return {
@@ -13,8 +17,11 @@ function makeDependencies() {
     hashService: new BcryptHashService(),
     tokenService: new JwtTokenService(),
     emailService: new NodemailerEmailService(),
+    postRepository: new PostgresPostRepository(),
+    commentRepository: new PostgresCommentRepository(),
+    likeRepository: new PostgresLikeRepository(),
+    categoryRepository: new PostgresCategoryRepository(),
   };
 }
 
 module.exports = makeDependencies;
-

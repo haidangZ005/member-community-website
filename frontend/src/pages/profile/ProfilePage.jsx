@@ -1,16 +1,16 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { AtSign, Camera, LogOut, Mail, MessageCircleMore, ShieldCheck, UserRound } from 'lucide-react';
+import { AtSign, Camera, Mail, ShieldCheck, UserRound } from 'lucide-react';
 import FormField from '../../components/ui/FormField';
 import SubmitButton from '../../components/ui/SubmitButton';
-import { useLogout, useProfile, useUpdateProfile } from '../../features/auth/hooks/useAuth';
+import { useProfile, useUpdateProfile } from '../../features/auth/hooks/useAuth';
 import { profileSchema } from '../../features/auth/schema/authSchema';
+import CommunityHeader from '../../components/layout/CommunityHeader';
 
 export default function ProfilePage() {
   const profile = useProfile();
   const update = useUpdateProfile();
-  const logout = useLogout();
   const { register, handleSubmit, reset, formState: { errors } } = useForm({ resolver: zodResolver(profileSchema), defaultValues: { fullName: '', username: '', avatarUrl: '' } });
 
   useEffect(() => {
@@ -20,10 +20,7 @@ export default function ProfilePage() {
   if (profile.isLoading) return <div className="page-loader">Đang tải hồ sơ...</div>;
   return (
     <main className="profile-page">
-      <header className="site-header">
-        <div className="brand dark"><span className="brand-mark"><MessageCircleMore size={22} /></span><span>Common Ground</span></div>
-        <button className="ghost-button" onClick={() => logout.mutate()} disabled={logout.isPending}><LogOut size={17} /> Đăng xuất</button>
-      </header>
+      <CommunityHeader />
       <section className="profile-hero">
         <div><p className="eyebrow"><ShieldCheck size={15} /> Tài khoản thành viên</p><h1>Hồ sơ của bạn</h1><p>Cập nhật cách bạn xuất hiện trong những cuộc trò chuyện của cộng đồng.</p></div>
         <div className="avatar-card">{profile.data?.avatarUrl ? <img src={profile.data.avatarUrl} alt="Ảnh đại diện" /> : <span>{(profile.data?.fullName || profile.data?.username || 'M').slice(0, 1).toUpperCase()}</span>}<small><Camera size={14} /> Ảnh đại diện</small></div>
@@ -45,4 +42,3 @@ export default function ProfilePage() {
     </main>
   );
 }
-

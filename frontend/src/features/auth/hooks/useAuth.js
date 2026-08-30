@@ -6,7 +6,7 @@ import { useAuthStore } from '../../../store/authStore';
 export function useLogin() {
   const navigate = useNavigate();
   const setSession = useAuthStore((state) => state.setSession);
-  return useMutation({ mutationFn: authApi.login, onSuccess: (session) => { setSession(session); navigate('/profile'); } });
+  return useMutation({ mutationFn: authApi.login, onSuccess: (session) => { setSession(session); navigate('/posts'); } });
 }
 
 export function useRegister() {
@@ -37,4 +37,3 @@ export function useLogout() {
   const clearSession = useAuthStore((state) => state.clearSession);
   return useMutation({ mutationFn: authApi.logout, onSettled: () => { clearSession(); navigate('/login'); } });
 }
-

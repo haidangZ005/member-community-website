@@ -1,0 +1,51 @@
+process.env.NODE_ENV = 'test';
+
+const request = require('supertest');
+const createApp = require('../../src/main/app');
+const makeUseCases = require('../../src/main/factories/makeUseCases');
+const { makeFakeDependencies } = require('../helpers/fakes');
+
+describe('Community API', () => {
+  let app;
+  let agent;
+  let authorization;
+
+  beforeEach(async () => {
+    const dependencies = makeFakeDependencies();
+    app = createApp({ dependencies, useCases: makeUseCases(dependencies), tokenService: dependencies.tokenService });
+    agent = request.agent(app);
+    await agent.post('/api/auth/register').send({ username: 'haidang', email: 'dang@example.com', password: 'Matkhau123', fullName: 'Hải Đăng' });
+    const login = await agent.post('/api/auth/login').send({ email: 'dang@example.com', password: 'Matkhau123' });
+    authorization = `Bearer ${login.body.data.accessToken}`;
+  });
+
+  test('tạo → đọc → sửa → thích → bình luận → xóa bài viết', async () => {
+    const categories = await agent.get('/api/posts/categories').set('Authorization', authorization).expect(200);
+    const created = await agent.post('/api/posts').set('Authorization', authorization).send({
+      title: 'Cùng xây một không gian chia sẻ',
+      content: 'Đây là nội dung thảo luận đầu tiên dành cho tất cả thành viên.',
+      categoryId: categories.body.data[0].id,
+    }).expect(201);
+    const postId = created.body.data.id;
+
+    await agent.get('/api/posts?page=1').set('Authorization', authorization).expect(200).expect(({ body }) => {
+      expect(body.data).toHaveLength(1);
+      expect(body.meta.total).toBe(1);
+    });
+    await agent.get(`/api/posts/${postId}`).set('Authorization', authorization).expect(200);
+    await agent.put(`/api/posts/${postId}`).set('Authorization', authorization).send({ title: 'Cùng xây không gian chia sẻ tốt hơn' }).expect(200);
+    await agent.post(`/api/posts/${postId}/like`).set('Authorization', authorization).expect(200).expect(({ body }) => expect(body.data.likeCount).toBe(1));
+    await agent.post(`/api/posts/${postId}/comments`).set('Authorization', authorization).send({ content: 'Mình rất đồng tình với ý tưởng này.' }).expect(201);
+    await agent.get(`/api/posts/${postId}/comments`).set('Authorization', authorization).expect(200).expect(({ body }) => expect(body.data).toHaveLength(1));
+    await agent.delete(`/api/posts/${postId}/like`).set('Authorization', authorization).expect(200).expect(({ body }) => expect(body.data.likeCount).toBe(0));
+    await agent.delete(`/api/posts/${postId}`).set('Authorization', authorization).expect(200);
+    await agent.get(`/api/posts/${postId}`).set('Authorization', authorization).expect(404);
+  });
+
+  test('bảo vệ endpoint và validate nội dung', async () => {
+    await request(app).get('/api/posts').expect(401);
+    await agent.post('/api/posts').set('Authorization', authorization).send({ title: 'x', content: 'ngắn' }).expect(422);
+    await agent.post('/api/posts/00000000-0000-4000-8000-000000000000/comments').set('Authorization', authorization).send({ content: 'Nội dung bình luận' }).expect(404);
+    await agent.get('/api/posts?page=0').set('Authorization', authorization).expect(422);
+  });
+});
