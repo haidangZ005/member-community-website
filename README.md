@@ -1,98 +1,113 @@
-# Common Ground — Member Community Website
+# Common Ground
 
-Phiên bản Sprint 1 của nền tảng cộng đồng thành viên, triển khai theo tài liệu kiến trúc trong repository: Node.js + Express, React + Vite, PostgreSQL và Clean Architecture.
+Common Ground là website cộng đồng dành cho thành viên. Người dùng có thể tạo tài khoản, đăng nhập, cập nhật hồ sơ, đăng bài viết, thích bài viết và bình luận.
 
-## Chức năng Sprint 1
-
-- Đăng ký tài khoản với kiểm tra email/tên người dùng trùng và mật khẩu an toàn.
-- Đăng nhập bằng access token JWT; refresh token được băm trong PostgreSQL và gửi qua cookie `HttpOnly`.
-- Xoay vòng refresh token, khôi phục phiên khi tải lại trang và đăng xuất/thu hồi token.
-- Quên mật khẩu với phản hồi chống dò email, token một lần có hạn 30 phút và email qua SMTP.
-- Đặt lại mật khẩu, vô hiệu hóa token reset và thu hồi mọi phiên cũ.
-- Xem/cập nhật hồ sơ cá nhân qua route được bảo vệ.
-- Giao diện responsive cho đăng ký, đăng nhập, quên/đặt lại mật khẩu và hồ sơ.
-
-## Cấu trúc
+## Cách dự án hoạt động
 
 ```text
-backend/src/
-  domain/          Entities, errors và repository contracts
-  application/     Auth/profile use cases và service ports
-  interfaces/      Controllers, routes, validators, middleware
-  infrastructure/  PostgreSQL repositories, JWT, bcrypt, email
-  main/            Composition root và Express server
-
-frontend/src/
-  app/             Router và providers
-  pages/           Các trang theo route
-  features/auth/   API, hooks, schema và form xác thực
-  components/      UI/layout dùng chung
-  services/        Axios client và interceptor refresh token
-  store/           Zustand auth store
+Trình duyệt (React)
+        ↓ gọi API
+Backend (Express)
+        ↓ xử lý nghiệp vụ
+PostgreSQL
 ```
 
-`domain/` và `application/` của backend không phụ thuộc Express hoặc PostgreSQL.
+- Frontend React hiển thị giao diện và gọi API bằng Axios.
+- Backend Express kiểm tra dữ liệu, xác thực người dùng và xử lý nghiệp vụ theo Clean Architecture.
+- PostgreSQL lưu tài khoản, phiên đăng nhập, chuyên mục, bài viết, lượt thích và bình luận.
+- Access token được gửi qua header. Refresh token được lưu trong cookie `HttpOnly`.
 
-## Chạy dự án
+## Chức năng hiện có
 
-Yêu cầu: Node.js 20+, npm và PostgreSQL 15+; hoặc Docker cho database.
+- Đăng ký, đăng nhập, đăng xuất và khôi phục mật khẩu.
+- Xem và cập nhật hồ sơ cá nhân.
+- Xem danh sách bài viết, phân trang và lọc theo chuyên mục.
+- Tạo, xem, sửa và xóa bài viết của chính mình.
+- Thích hoặc bỏ thích bài viết.
+- Viết và xem bình luận.
 
-```bash
+## Cách chạy dự án
+
+### 1. Chuẩn bị
+
+Cài đặt:
+
+- Node.js 20 trở lên.
+- Docker Desktop.
+
+Mở PowerShell tại thư mục dự án và chạy:
+
+```powershell
 npm run install:all
+Copy-Item backend/.env.example backend/.env
+Copy-Item frontend/.env.example frontend/.env
+```
+
+Hai lệnh `Copy-Item` chỉ cần chạy lần đầu. Nếu file `.env` đã tồn tại thì bỏ qua.
+
+### 2. Khởi động database
+
+Mở Docker Desktop, sau đó chạy:
+
+```powershell
 docker compose up -d postgres
 ```
 
-Sao chép cấu hình mẫu và thay các JWT secret bằng chuỗi ngẫu nhiên mạnh:
+Tạo các bảng trong database:
 
-```bash
-cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env
+```powershell
+$env:DATABASE_URL = "postgresql://postgres:password@localhost:5432/member_community_db"
 npm run migrate:up --prefix backend
 ```
 
-Chạy hai tiến trình trong hai terminal:
+### 3. Khởi động backend
 
-```bash
+```powershell
 npm run dev:backend
+```
+
+Backend chạy tại `http://localhost:4000`.
+
+Có thể kiểm tra bằng đường dẫn: `http://localhost:4000/api/health`.
+
+### 4. Khởi động frontend
+
+Giữ backend đang chạy, mở một cửa sổ PowerShell khác và chạy:
+
+```powershell
 npm run dev:frontend
 ```
 
-- Frontend: `http://localhost:5173`
-- Backend health check: `http://localhost:4000/api/health`
+Mở `http://localhost:5173` trên trình duyệt. Đăng ký một tài khoản mới, sau đó đăng nhập để thử các chức năng cộng đồng.
 
-Nếu không cấu hình SMTP, email reset được tạo bằng `jsonTransport` để môi trường phát triển không gửi email thật. Khi tích hợp SMTP, đặt `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS` và `SMTP_FROM` trong `backend/.env`.
+## Cấu trúc chính
 
-## API Sprint 1
+```text
+backend/
+  src/domain/          Entity và quy tắc nghiệp vụ
+  src/application/     Các use case
+  src/interfaces/      API, controller và validation
+  src/infrastructure/  PostgreSQL, JWT, bcrypt và email
 
-| Method | Endpoint | Xác thực |
-|---|---|---|
-| POST | `/api/auth/register` | Guest |
-| POST | `/api/auth/login` | Guest |
-| POST | `/api/auth/refresh` | Refresh cookie |
-| POST | `/api/auth/logout` | Refresh cookie |
-| POST | `/api/auth/forgot-password` | Guest |
-| POST | `/api/auth/reset-password` | Reset token |
-| GET | `/api/users/me` | Bearer access token |
-| PUT | `/api/users/me` | Bearer access token |
+frontend/
+  src/pages/           Các trang giao diện
+  src/features/        Auth, bài viết và bình luận
+  src/components/      Component dùng chung
+```
 
-Mọi response dùng `{ "data": ... }`; mọi lỗi dùng `{ "error": { "code": "...", "message": "..." } }`.
+## Kiểm tra mã nguồn
 
-## Kiểm tra chất lượng
-
-```bash
+```powershell
 npm test
 npm run lint --prefix backend
 npm run lint --prefix frontend
 npm run build
 ```
 
-Test backend dùng repository/service giả lập nên không cần database thật. Migration và PostgreSQL repository được dùng khi chạy ứng dụng thực tế.
+## Dừng database
 
-## Ghi chú bảo mật
+```powershell
+docker compose down
+```
 
-- Không commit `.env`; repository chỉ lưu `.env.example`.
-- Access token chỉ nằm trong bộ nhớ Zustand, không lưu vào `localStorage`.
-- Refresh/reset token chỉ được lưu dạng SHA-256 hash trong database.
-- Refresh cookie dùng `HttpOnly`, `SameSite=Strict` và bật `Secure` ở production.
-- API auth có rate limit; input được kiểm tra bằng Zod; lỗi được xử lý tập trung và không lộ stack trace ở production.
-
+Dữ liệu vẫn được giữ trong Docker volume để dùng cho lần chạy tiếp theo.
