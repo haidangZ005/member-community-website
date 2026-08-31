@@ -81,6 +81,36 @@ class PostgresPostRepository {
   async remove(id) {
     await pool.query("UPDATE posts SET status = 'removed' WHERE id = $1", [id]);
   }
+
+  async listAll({ page, limit, search, status }) {
+    const offset = (page - 1) * limit;
+    const pattern = `%${search}%`;
+    const [itemsResult, countResult] = await Promise.all([
+      pool.query(
+        `${baseSelect}
+         WHERE ($2 = '' OR p.title ILIKE $3 OR p.content ILIKE $3 OR u.username ILIKE $3)
+         AND ($4::post_status IS NULL OR p.status = $4)
+         ORDER BY p.created_at DESC LIMIT $5 OFFSET $6`,
+        [null, search, pattern, status, limit, offset],
+      ),
+      pool.query(
+        `SELECT COUNT(*)::int AS total FROM posts p JOIN users u ON u.id = p.author_id
+         WHERE ($1 = '' OR p.title ILIKE $2 OR p.content ILIKE $2 OR u.username ILIKE $2)
+         AND ($3::post_status IS NULL OR p.status = $3)`,
+        [search, pattern, status],
+      ),
+    ]);
+    return { items: itemsResult.rows.map(mapPost), total: countResult.rows[0].total };
+  }
+
+  async countByStatus() {
+    const { rows } = await pool.query(
+      `SELECT COUNT(*)::int AS total,
+       COUNT(*) FILTER (WHERE status = 'published')::int AS published,
+       COUNT(*) FILTER (WHERE status = 'removed')::int AS removed FROM posts`,
+    );
+    return rows[0];
+  }
 }
 
 module.exports = PostgresPostRepository;

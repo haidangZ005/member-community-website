@@ -16,6 +16,18 @@ const LikePost = require('../../application/use-cases/posts/LikePost');
 const UnlikePost = require('../../application/use-cases/posts/UnlikePost');
 const CreateComment = require('../../application/use-cases/comments/CreateComment');
 const ListCommentsByPost = require('../../application/use-cases/comments/ListCommentsByPost');
+const ListMembers = require('../../application/use-cases/admin/ListMembers');
+const LockMemberAccount = require('../../application/use-cases/admin/LockMemberAccount');
+const UnlockMemberAccount = require('../../application/use-cases/admin/UnlockMemberAccount');
+const AdminListPosts = require('../../application/use-cases/admin/AdminListPosts');
+const AdminDeletePost = require('../../application/use-cases/admin/AdminDeletePost');
+const AdminListComments = require('../../application/use-cases/admin/AdminListComments');
+const ModerateComment = require('../../application/use-cases/admin/ModerateComment');
+const ListCategories = require('../../application/use-cases/admin/ListCategories');
+const CreateCategory = require('../../application/use-cases/admin/CreateCategory');
+const UpdateCategory = require('../../application/use-cases/admin/UpdateCategory');
+const DeleteCategory = require('../../application/use-cases/admin/DeleteCategory');
+const GetDashboardStats = require('../../application/use-cases/admin/GetDashboardStats');
 
 function makeUseCases(dependencies) {
   const {
@@ -40,6 +52,18 @@ function makeUseCases(dependencies) {
     unlikePost: new UnlikePost({ postRepository, likeRepository }),
     createComment: new CreateComment({ postRepository, commentRepository }),
     listCommentsByPost: new ListCommentsByPost({ postRepository, commentRepository }),
+    listMembers: new ListMembers({ userRepository }),
+    lockMemberAccount: new LockMemberAccount({ userRepository, refreshTokenRepository }),
+    unlockMemberAccount: new UnlockMemberAccount({ userRepository }),
+    adminListPosts: new AdminListPosts({ postRepository }),
+    adminDeletePost: new AdminDeletePost({ postRepository }),
+    adminListComments: new AdminListComments({ commentRepository }),
+    moderateComment: new ModerateComment({ commentRepository }),
+    listAdminCategories: new ListCategories({ categoryRepository }),
+    createCategory: new CreateCategory({ categoryRepository }),
+    updateCategory: new UpdateCategory({ categoryRepository }),
+    deleteCategory: new DeleteCategory({ categoryRepository }),
+    getDashboardStats: new GetDashboardStats({ userRepository, postRepository, commentRepository, categoryRepository }),
   };
 }
 

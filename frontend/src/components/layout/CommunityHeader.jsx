@@ -1,5 +1,5 @@
 import { Link, NavLink } from 'react-router-dom';
-import { LogOut, MessageCircleMore, PenLine, UserRound } from 'lucide-react';
+import { LogOut, MessageCircleMore, PenLine, ShieldCheck, UserRound } from 'lucide-react';
 import { useLogout } from '../../features/auth/hooks/useAuth';
 import { useAuthStore } from '../../store/authStore';
 
@@ -14,6 +14,7 @@ export default function CommunityHeader() {
         <nav className="community-nav" aria-label="Điều hướng chính">
           <NavLink to="/posts">Cộng đồng</NavLink>
           <NavLink to="/posts/new"><PenLine size={16} /> Viết bài</NavLink>
+          {user?.role === 'admin' && <NavLink to="/admin"><ShieldCheck size={16} /> Quản trị</NavLink>}
         </nav>
         <div className="account-menu">
           <Link className="account-link" to="/profile"><UserRound size={17} /><span>{displayName}</span></Link>

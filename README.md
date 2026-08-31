@@ -25,6 +25,7 @@ PostgreSQL
 - Tạo, xem, sửa và xóa bài viết của chính mình.
 - Thích hoặc bỏ thích bài viết.
 - Viết và xem bình luận.
+- Khu vực quản trị: dashboard, quản lý thành viên, kiểm duyệt nội dung và quản lý chuyên mục.
 
 ## Cách chạy dự án
 
@@ -59,6 +60,17 @@ Tạo các bảng trong database:
 $env:DATABASE_URL = "postgresql://postgres:password@localhost:5432/member_community_db"
 npm run migrate:up --prefix backend
 ```
+
+Để tạo tài khoản quản trị lần đầu:
+
+```powershell
+$env:ADMIN_EMAIL = "admin@example.com"
+$env:ADMIN_USERNAME = "admin"
+$env:ADMIN_PASSWORD = "DoiMatKhauNay123"
+npm run seed:admin --prefix backend
+```
+
+Hãy thay mật khẩu ví dụ bằng mật khẩu riêng trước khi chạy.
 
 ### 3. Khởi động backend
 

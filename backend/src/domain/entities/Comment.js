@@ -1,7 +1,7 @@
 const ValidationError = require('../errors/ValidationError');
 
 class Comment {
-  constructor({ id, postId, authorId, content, status = 'visible', author = null, createdAt, updatedAt }) {
+  constructor({ id, postId, authorId, content, status = 'visible', author = null, post = null, createdAt, updatedAt }) {
     const normalizedContent = content?.trim();
     if (!normalizedContent || normalizedContent.length < 2 || normalizedContent.length > 2000) {
       throw new ValidationError('Bình luận phải có từ 2 đến 2000 ký tự');
@@ -15,6 +15,7 @@ class Comment {
     this.content = normalizedContent;
     this.status = status;
     this.author = author;
+    this.post = post;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
   }
@@ -27,6 +28,7 @@ class Comment {
       content: this.content,
       status: this.status,
       author: this.author,
+      post: this.post,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
     };

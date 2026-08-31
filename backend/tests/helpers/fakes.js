@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../../src/domain/entities/User');
 const Post = require('../../src/domain/entities/Post');
 const Comment = require('../../src/domain/entities/Comment');
+const Category = require('../../src/domain/entities/Category');
 
 class MemoryUserRepository {
   constructor() { this.users = []; }
@@ -23,6 +24,21 @@ class MemoryUserRepository {
     const user = await this.findById(id);
     user.passwordHash = passwordHash;
     return user;
+  }
+  async listMembers({ page, limit, search }) {
+    const normalized = search.toLowerCase();
+    const filtered = this.users.filter((user) => user.role === 'member' && [user.username, user.email, user.fullName || ''].some((value) => value.toLowerCase().includes(normalized)));
+    return { items: filtered.slice((page - 1) * limit, page * limit), total: filtered.length };
+  }
+  async updateStatus(id, status) {
+    const user = await this.findById(id);
+    user.status = status;
+    user.updatedAt = new Date();
+    return user;
+  }
+  async countByStatus() {
+    const members = this.users.filter((user) => user.role === 'member');
+    return { total: members.length, active: members.filter((user) => user.status === 'active').length, locked: members.filter((user) => user.status === 'locked').length };
   }
 }
 
@@ -67,12 +83,26 @@ class MemoryCategoryRepository {
   constructor() {
     const now = new Date();
     this.categories = [
-      { id: crypto.randomUUID(), name: 'Hỏi đáp', description: 'Cùng nhau giải đáp', createdAt: now, updatedAt: now },
-      { id: crypto.randomUUID(), name: 'Chia sẻ', description: 'Kinh nghiệm thành viên', createdAt: now, updatedAt: now },
+      new Category({ id: crypto.randomUUID(), name: 'Hỏi đáp', description: 'Cùng nhau giải đáp', createdAt: now, updatedAt: now }),
+      new Category({ id: crypto.randomUUID(), name: 'Chia sẻ', description: 'Kinh nghiệm thành viên', createdAt: now, updatedAt: now }),
     ];
   }
   async findById(id) { return this.categories.find((category) => category.id === id) || null; }
   async list() { return [...this.categories]; }
+  async findByName(name) { return this.categories.find((category) => category.name.toLowerCase() === name.toLowerCase()) || null; }
+  async create(category) {
+    const created = new Category({ ...category, id: crypto.randomUUID(), createdAt: new Date(), updatedAt: new Date() });
+    this.categories.push(created);
+    return created;
+  }
+  async update(id, changes) {
+    const index = this.categories.findIndex((category) => category.id === id);
+    const updated = new Category({ ...changes, id, createdAt: this.categories[index].createdAt, updatedAt: new Date() });
+    this.categories[index] = updated;
+    return updated;
+  }
+  async remove(id) { this.categories = this.categories.filter((category) => category.id !== id); }
+  async count() { return this.categories.length; }
 }
 
 class MemoryLikeRepository {
@@ -89,10 +119,12 @@ class MemoryCommentRepository {
   constructor(userRepository) { this.comments = []; this.userRepository = userRepository; }
   async create(comment) {
     const user = await this.userRepository.findById(comment.authorId);
+    const post = this.postRepository?.posts.find((item) => item.id === comment.postId);
     const created = new Comment({
       ...comment,
       id: crypto.randomUUID(),
       author: user ? { id: user.id, username: user.username, fullName: user.fullName, avatarUrl: user.avatarUrl } : null,
+      post: post ? { id: post.id, title: post.title } : null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -101,6 +133,17 @@ class MemoryCommentRepository {
   }
   async listByPost(postId) { return this.comments.filter((comment) => comment.postId === postId && comment.status === 'visible'); }
   countByPost(postId) { return this.comments.filter((comment) => comment.postId === postId && comment.status === 'visible').length; }
+  async findById(id) { return this.comments.find((comment) => comment.id === id) || null; }
+  async listAll({ page, limit, search, status }) {
+    const normalized = search.toLowerCase();
+    const filtered = this.comments.filter((comment) => (!status || comment.status === status)
+      && [comment.content, comment.author?.username || '', comment.post?.title || ''].some((value) => value.toLowerCase().includes(normalized)));
+    return { items: filtered.slice((page - 1) * limit, page * limit), total: filtered.length };
+  }
+  async moderate(id, status) { const comment = await this.findById(id); comment.status = status; comment.updatedAt = new Date(); return comment; }
+  async countByStatus() {
+    return { total: this.comments.length, visible: this.comments.filter((comment) => comment.status === 'visible').length, removed: this.comments.filter((comment) => comment.status === 'removed').length };
+  }
 }
 
 class MemoryPostRepository {
@@ -143,6 +186,16 @@ class MemoryPostRepository {
     return this.hydrate(post, viewerId);
   }
   async remove(id) { const post = this.posts.find((item) => item.id === id); if (post) post.status = 'removed'; }
+  async listAll({ page, limit, search, status }) {
+    const normalized = search.toLowerCase();
+    const filtered = this.posts.filter((post) => (!status || post.status === status)
+      && [post.title, post.content].some((value) => value.toLowerCase().includes(normalized)));
+    const items = await Promise.all(filtered.slice((page - 1) * limit, page * limit).map((post) => this.hydrate(post)));
+    return { items, total: filtered.length };
+  }
+  async countByStatus() {
+    return { total: this.posts.length, published: this.posts.filter((post) => post.status === 'published').length, removed: this.posts.filter((post) => post.status === 'removed').length };
+  }
 }
 
 function makeFakeDependencies() {
@@ -151,6 +204,7 @@ function makeFakeDependencies() {
   const likeRepository = new MemoryLikeRepository();
   const commentRepository = new MemoryCommentRepository(userRepository);
   const postRepository = new MemoryPostRepository(userRepository, categoryRepository, likeRepository, commentRepository);
+  commentRepository.postRepository = postRepository;
   return {
     userRepository,
     refreshTokenRepository: new MemoryRefreshTokenRepository(),

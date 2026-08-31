@@ -8,6 +8,7 @@
     "start": "node src/main/server.js",
     "migrate:up": "node-pg-migrate up --migration-file-language sql --migrations-dir src/infrastructure/database/postgres/migrations",
     "migrate:down": "node-pg-migrate down --migration-file-language sql --migrations-dir src/infrastructure/database/postgres/migrations",
+    "seed:admin": "node src/infrastructure/database/postgres/seeds/seedAdmin.js",
     "test": "jest --runInBand --coverage",
     "test:unit": "jest tests/unit --runInBand",
     "test:e2e": "jest tests/e2e --runInBand",

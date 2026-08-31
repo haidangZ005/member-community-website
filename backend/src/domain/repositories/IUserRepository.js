@@ -5,7 +5,9 @@ class IUserRepository {
   async create(_user) { throw new Error('Not implemented'); }
   async updateProfile(_id, _profile) { throw new Error('Not implemented'); }
   async updatePassword(_id, _passwordHash) { throw new Error('Not implemented'); }
+  async listMembers(_options) { throw new Error('Not implemented'); }
+  async updateStatus(_id, _status) { throw new Error('Not implemented'); }
+  async countByStatus() { throw new Error('Not implemented'); }
 }
 
 module.exports = IUserRepository;
-

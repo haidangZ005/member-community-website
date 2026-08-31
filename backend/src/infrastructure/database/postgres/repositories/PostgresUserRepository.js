@@ -58,7 +58,40 @@ class PostgresUserRepository {
     );
     return mapUser(rows[0]);
   }
+
+  async listMembers({ page, limit, search }) {
+    const offset = (page - 1) * limit;
+    const pattern = `%${search}%`;
+    const [itemsResult, countResult] = await Promise.all([
+      pool.query(
+        `SELECT * FROM users WHERE role = 'member'
+         AND ($1 = '' OR username ILIKE $2 OR email ILIKE $2 OR COALESCE(full_name, '') ILIKE $2)
+         ORDER BY created_at DESC LIMIT $3 OFFSET $4`,
+        [search, pattern, limit, offset],
+      ),
+      pool.query(
+        `SELECT COUNT(*)::int AS total FROM users WHERE role = 'member'
+         AND ($1 = '' OR username ILIKE $2 OR email ILIKE $2 OR COALESCE(full_name, '') ILIKE $2)`,
+        [search, pattern],
+      ),
+    ]);
+    return { items: itemsResult.rows.map(mapUser), total: countResult.rows[0].total };
+  }
+
+  async updateStatus(id, status) {
+    const { rows } = await pool.query('UPDATE users SET status = $2 WHERE id = $1 RETURNING *', [id, status]);
+    return mapUser(rows[0]);
+  }
+
+  async countByStatus() {
+    const { rows } = await pool.query(
+      `SELECT COUNT(*)::int AS total,
+       COUNT(*) FILTER (WHERE status = 'active')::int AS active,
+       COUNT(*) FILTER (WHERE status = 'locked')::int AS locked
+       FROM users WHERE role = 'member'`,
+    );
+    return rows[0];
+  }
 }
 
 module.exports = PostgresUserRepository;
-

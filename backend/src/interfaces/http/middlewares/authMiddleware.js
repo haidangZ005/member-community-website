@@ -1,16 +1,24 @@
 const UnauthorizedError = require('../../../domain/errors/UnauthorizedError');
 
-function makeAuthMiddleware(tokenService) {
-  return (req, _res, next) => {
+function makeAuthMiddleware(tokenService, userRepository) {
+  return async (req, _res, next) => {
     const [scheme, token] = (req.headers.authorization || '').split(' ');
     if (scheme !== 'Bearer' || !token) return next(new UnauthorizedError('Vui lòng đăng nhập'));
 
+    let payload;
     try {
-      const payload = tokenService.verifyAccessToken(token);
-      req.user = { id: payload.sub, role: payload.role };
-      return next();
+      payload = tokenService.verifyAccessToken(token);
     } catch {
       return next(new UnauthorizedError('Access token không hợp lệ hoặc đã hết hạn'));
+    }
+
+    try {
+      const user = await userRepository.findById(payload.sub);
+      if (!user || user.status !== 'active') return next(new UnauthorizedError('Tài khoản không còn quyền truy cập'));
+      req.user = { id: user.id, role: user.role };
+      return next();
+    } catch (error) {
+      return next(error);
     }
   };
 }

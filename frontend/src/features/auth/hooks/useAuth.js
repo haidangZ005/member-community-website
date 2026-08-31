@@ -6,7 +6,7 @@ import { useAuthStore } from '../../../store/authStore';
 export function useLogin() {
   const navigate = useNavigate();
   const setSession = useAuthStore((state) => state.setSession);
-  return useMutation({ mutationFn: authApi.login, onSuccess: (session) => { setSession(session); navigate('/posts'); } });
+  return useMutation({ mutationFn: authApi.login, onSuccess: (session) => { setSession(session); navigate(session.user.role === 'admin' ? '/admin' : '/posts'); } });
 }
 
 export function useRegister() {

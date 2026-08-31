@@ -9,6 +9,13 @@ import PostListPage from '../../pages/posts/PostListPage';
 import PostDetailPage from '../../pages/posts/PostDetailPage';
 import PostEditorPage from '../../pages/posts/PostEditorPage';
 import CreatePostPage from '../../pages/posts/CreatePostPage';
+import AdminRoute from './AdminRoute';
+import AdminLayout from '../../components/admin/AdminLayout';
+import DashboardPage from '../../pages/admin/DashboardPage';
+import MemberManagementPage from '../../pages/admin/MemberManagementPage';
+import PostModerationPage from '../../pages/admin/PostModerationPage';
+import CommentModerationPage from '../../pages/admin/CommentModerationPage';
+import CategoryManagementPage from '../../pages/admin/CategoryManagementPage';
 
 export default function AppRoutes() {
   return (
@@ -22,6 +29,13 @@ export default function AppRoutes() {
       <Route path="/posts/new" element={<ProtectedRoute><CreatePostPage /></ProtectedRoute>} />
       <Route path="/posts/:id" element={<ProtectedRoute><PostDetailPage /></ProtectedRoute>} />
       <Route path="/posts/:id/edit" element={<ProtectedRoute><PostEditorPage /></ProtectedRoute>} />
+      <Route path="/admin" element={<ProtectedRoute><AdminRoute><AdminLayout /></AdminRoute></ProtectedRoute>}>
+        <Route index element={<DashboardPage />} />
+        <Route path="members" element={<MemberManagementPage />} />
+        <Route path="posts" element={<PostModerationPage />} />
+        <Route path="comments" element={<CommentModerationPage />} />
+        <Route path="categories" element={<CategoryManagementPage />} />
+      </Route>
       <Route path="*" element={<Navigate to="/posts" replace />} />
     </Routes>
   );

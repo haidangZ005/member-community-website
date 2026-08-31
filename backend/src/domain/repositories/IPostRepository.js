@@ -4,6 +4,8 @@ class IPostRepository {
   async findById(_id, _viewerId) { throw new Error('Not implemented'); }
   async update(_id, _changes, _viewerId) { throw new Error('Not implemented'); }
   async remove(_id) { throw new Error('Not implemented'); }
+  async listAll(_options) { throw new Error('Not implemented'); }
+  async countByStatus() { throw new Error('Not implemented'); }
 }
 
 module.exports = IPostRepository;
