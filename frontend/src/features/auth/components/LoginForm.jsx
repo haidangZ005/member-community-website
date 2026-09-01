@@ -13,10 +13,9 @@ export default function LoginForm() {
   return (
     <form className="auth-form" onSubmit={handleSubmit((values) => login.mutate(values))} noValidate>
       {apiError && <div className="alert error" role="alert">{apiError}</div>}
-      <FormField label="Email" icon={Mail} error={errors.email?.message}><input type="email" autoComplete="email" placeholder="ban@example.com" {...register('email')} /></FormField>
+      <FormField label="Email" icon={Mail} error={errors.email?.message}><input type="email" autoComplete="email" placeholder="Nhập địa chỉ email" {...register('email')} /></FormField>
       <FormField label="Mật khẩu" icon={LockKeyhole} error={errors.password?.message}><input type="password" autoComplete="current-password" placeholder="Nhập mật khẩu" {...register('password')} /></FormField>
       <SubmitButton isPending={login.isPending}>Đăng nhập</SubmitButton>
     </form>
   );
 }
-

@@ -18,7 +18,7 @@ export default function ForgotPasswordPage() {
       ) : (
         <form className="auth-form" onSubmit={handleSubmit((values) => mutation.mutate(values))} noValidate>
           {mutation.error && <div className="alert error">{mutation.error.response?.data?.error?.message || 'Không thể gửi yêu cầu lúc này.'}</div>}
-          <FormField label="Email" icon={Mail} error={errors.email?.message}><input type="email" autoComplete="email" placeholder="ban@example.com" {...register('email')} /></FormField>
+          <FormField label="Email" icon={Mail} error={errors.email?.message}><input type="email" autoComplete="email" placeholder="Nhập địa chỉ email" {...register('email')} /></FormField>
           <SubmitButton isPending={mutation.isPending}>Gửi liên kết</SubmitButton>
         </form>
       )}
@@ -26,4 +26,3 @@ export default function ForgotPasswordPage() {
     </AuthLayout>
   );
 }
-
