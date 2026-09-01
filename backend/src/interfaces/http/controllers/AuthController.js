@@ -3,7 +3,7 @@ const env = require('../../../infrastructure/config/env');
 function refreshCookieOptions() {
   return {
     httpOnly: true,
-    secure: env.NODE_ENV === 'production',
+    secure: env.COOKIE_SECURE,
     sameSite: 'strict',
     maxAge: 7 * 24 * 60 * 60 * 1000,
     path: '/api/auth',
@@ -49,4 +49,3 @@ function makeAuthController(useCases) {
 }
 
 module.exports = makeAuthController;
-

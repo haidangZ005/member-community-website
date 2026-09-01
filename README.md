@@ -1,42 +1,21 @@
 # Common Ground
 
-Common Ground là website cộng đồng dành cho thành viên. Người dùng có thể tạo tài khoản, đăng nhập, cập nhật hồ sơ, đăng bài viết, thích bài viết và bình luận.
+Common Ground là website cộng đồng gồm frontend React, API Express và PostgreSQL. Thành viên có thể đăng ký, cập nhật hồ sơ, đăng bài, bình luận và thích bài viết. Quản trị viên có dashboard để quản lý thành viên, nội dung và chuyên mục.
 
-## Cách dự án hoạt động
+## Cách hoạt động
 
 ```text
-Trình duyệt (React)
-        ↓ gọi API
-Backend (Express)
-        ↓ xử lý nghiệp vụ
-PostgreSQL
+Trình duyệt React → REST API Express → PostgreSQL
 ```
 
-- Frontend React hiển thị giao diện và gọi API bằng Axios.
-- Backend Express kiểm tra dữ liệu, xác thực người dùng và xử lý nghiệp vụ theo Clean Architecture.
-- PostgreSQL lưu tài khoản, phiên đăng nhập, chuyên mục, bài viết, lượt thích và bình luận.
-- Access token được gửi qua header. Refresh token được lưu trong cookie `HttpOnly`.
+- Backend được tổ chức theo Clean Architecture, kiểm tra dữ liệu bằng Zod.
+- Access token dùng để gọi API; refresh token nằm trong cookie `HttpOnly`.
+- Mật khẩu được băm bằng bcrypt trước khi lưu vào database.
+- Route quản trị yêu cầu đăng nhập và role `admin`.
 
-## Chức năng hiện có
+## Chạy khi phát triển
 
-- Đăng ký, đăng nhập, đăng xuất và khôi phục mật khẩu.
-- Xem và cập nhật hồ sơ cá nhân.
-- Xem danh sách bài viết, phân trang và lọc theo chuyên mục.
-- Tạo, xem, sửa và xóa bài viết của chính mình.
-- Thích hoặc bỏ thích bài viết.
-- Viết và xem bình luận.
-- Khu vực quản trị: dashboard, quản lý thành viên, kiểm duyệt nội dung và quản lý chuyên mục.
-
-## Cách chạy dự án
-
-### 1. Chuẩn bị
-
-Cài đặt:
-
-- Node.js 20 trở lên.
-- Docker Desktop.
-
-Mở PowerShell tại thư mục dự án và chạy:
+Cần Node.js 20+ và PostgreSQL 16+. Có thể dùng PostgreSQL đã cài trên máy hoặc container Docker bên dưới.
 
 ```powershell
 npm run install:all
@@ -44,70 +23,66 @@ Copy-Item backend/.env.example backend/.env
 Copy-Item frontend/.env.example frontend/.env
 ```
 
-Hai lệnh `Copy-Item` chỉ cần chạy lần đầu. Nếu file `.env` đã tồn tại thì bỏ qua.
-
-### 2. Khởi động database
-
-Mở Docker Desktop, sau đó chạy:
+Sửa `DATABASE_URL` và các JWT secret trong `backend/.env`, sau đó chuẩn bị database:
 
 ```powershell
 docker compose up -d postgres
-```
-
-Tạo các bảng trong database:
-
-```powershell
-$env:DATABASE_URL = "postgresql://postgres:password@localhost:5432/member_community_db"
 npm run migrate:up --prefix backend
 ```
 
-Để tạo tài khoản quản trị lần đầu:
+Nếu PostgreSQL đang chạy trực tiếp trên máy, không cần chạy lệnh Docker; chỉ cần `DATABASE_URL` trỏ đúng database, tài khoản và mật khẩu của PostgreSQL đó.
 
-```powershell
-$env:ADMIN_EMAIL = "admin@example.com"
-$env:ADMIN_USERNAME = "admin"
-$env:ADMIN_PASSWORD = "DoiMatKhauNay123"
-npm run seed:admin --prefix backend
-```
-
-Hãy thay mật khẩu ví dụ bằng mật khẩu riêng trước khi chạy.
-
-### 3. Khởi động backend
+Mở hai cửa sổ PowerShell:
 
 ```powershell
 npm run dev:backend
 ```
 
-Backend chạy tại `http://localhost:4000`.
-
-Có thể kiểm tra bằng đường dẫn: `http://localhost:4000/api/health`.
-
-### 4. Khởi động frontend
-
-Giữ backend đang chạy, mở một cửa sổ PowerShell khác và chạy:
-
 ```powershell
 npm run dev:frontend
 ```
 
-Mở `http://localhost:5173` trên trình duyệt. Đăng ký một tài khoản mới, sau đó đăng nhập để thử các chức năng cộng đồng.
+Truy cập `http://localhost:5173`. API chạy tại `http://localhost:4000`, health check là `http://localhost:4000/api/health`.
 
-## Cấu trúc chính
+## Tạo dữ liệu ban đầu
 
-```text
-backend/
-  src/domain/          Entity và quy tắc nghiệp vụ
-  src/application/     Các use case
-  src/interfaces/      API, controller và validation
-  src/infrastructure/  PostgreSQL, JWT, bcrypt và email
+Tạo hoặc cập nhật admin:
 
-frontend/
-  src/pages/           Các trang giao diện
-  src/features/        Auth, bài viết và bình luận
-  src/components/      Component dùng chung
+```powershell
+$env:ADMIN_EMAIL = "admin@example.com"
+$env:ADMIN_USERNAME = "admin"
+$env:ADMIN_PASSWORD = "MatKhauRiengCuaBan"
+npm run seed:admin --prefix backend
+Remove-Item Env:ADMIN_EMAIL, Env:ADMIN_USERNAME, Env:ADMIN_PASSWORD
 ```
 
-## Kiểm tra mã nguồn
+Hãy đổi mật khẩu ví dụ trước khi chạy. Seed sẽ băm mật khẩu bằng bcrypt; database chỉ lưu chuỗi băm.
+
+Tạo ba thành viên, bài viết, bình luận và lượt thích để demo:
+
+```powershell
+$env:DEMO_PASSWORD = "MatKhauDemo123"
+npm run seed:demo --prefix backend
+Remove-Item Env:DEMO_PASSWORD
+```
+
+Các tài khoản demo được in ra sau khi seed. Chạy lại lệnh sẽ làm mới dữ liệu của chính các tài khoản demo, không xóa dữ liệu người dùng khác.
+
+## Chạy toàn bộ bằng Docker
+
+Đảm bảo cổng `5432`, `4000` và `5173` chưa được chương trình khác sử dụng:
+
+```powershell
+$env:JWT_ACCESS_SECRET = "mot-access-secret-dai-va-ngau-nhien"
+$env:JWT_REFRESH_SECRET = "mot-refresh-secret-khac-va-ngau-nhien"
+docker compose --profile app up --build
+```
+
+Migration được chạy tự động khi backend khởi động. Mở `http://localhost:5173`; nhấn `Ctrl+C` rồi chạy `docker compose --profile app down` để dừng.
+
+## Kiểm tra
+
+Chạy kiểm tra thông thường:
 
 ```powershell
 npm test
@@ -116,10 +91,31 @@ npm run lint --prefix frontend
 npm run build
 ```
 
-## Dừng database
+Chạy integration test với PostgreSQL riêng trên cổng `5433`:
 
 ```powershell
-docker compose down
+docker compose --profile test up -d postgres-test
+$env:TEST_DATABASE_URL = "postgresql://postgres:test_password@localhost:5433/member_community_test_db"
+npm run test:integration --prefix backend
+Remove-Item Env:TEST_DATABASE_URL
+docker compose --profile test stop postgres-test
 ```
 
-Dữ liệu vẫn được giữ trong Docker volume để dùng cho lần chạy tiếp theo.
+GitHub Actions cũng tự động chạy lint, test, integration test và frontend build cho mỗi pull request.
+
+## Triển khai
+
+- Dùng HTTPS và đặt `COOKIE_SECURE=true` ở backend.
+- Tạo `DATABASE_URL`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET` riêng trên nền tảng triển khai; không commit file `.env`.
+- Chạy migration trước khi mở API. Docker image backend đã có lệnh migration và frontend image phục vụ SPA qua Nginx.
+- Chạy `seed:admin` với mật khẩu thật, sau đó xóa các biến `ADMIN_*` khỏi môi trường nếu không còn cần.
+
+## Thư mục chính
+
+```text
+backend/src/domain/          Entity và quy tắc nghiệp vụ
+backend/src/application/     Use case
+backend/src/interfaces/      HTTP controller, route và validation
+backend/src/infrastructure/  PostgreSQL, JWT, bcrypt và email
+frontend/src/                Trang React, component và API client
+```
