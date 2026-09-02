@@ -51,6 +51,9 @@ jobs:
       - name: Lint frontend
         run: npm run lint --prefix frontend
 
+      - name: Test frontend theme
+        run: npm run test:theme --prefix frontend
+
       - name: Test backend
         run: npm test --prefix backend
 

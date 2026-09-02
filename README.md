@@ -1,6 +1,6 @@
 # Common Ground
 
-Common Ground là website cộng đồng gồm frontend React, API Express và PostgreSQL. Thành viên có thể đăng ký, cập nhật hồ sơ, đăng bài, bình luận và thích bài viết. Quản trị viên có dashboard để quản lý thành viên, nội dung và chuyên mục.
+Common Ground là website cộng đồng gồm frontend React, API Express và PostgreSQL. Thành viên có thể đăng ký, cập nhật hồ sơ, đăng bài, bình luận và thích bài viết. Quản trị viên có dashboard để quản lý thành viên, nội dung và chuyên mục. Giao diện hỗ trợ chế độ sáng, tối và tự nhận diện theo thiết bị.
 
 ## Cách hoạt động
 

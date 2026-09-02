@@ -5,6 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Không gian cộng đồng để kết nối, chia sẻ và cùng nhau tiến bộ." />
     <meta name="theme-color" content="#f7f4ed" />
+    <script>
+      (() => {
+        try {
+          const saved = localStorage.getItem('common-ground-theme');
+          const preference = ['light', 'dark', 'system'].includes(saved) ? saved : 'system';
+          const theme = preference === 'system'
+            ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+            : preference;
+          document.documentElement.dataset.theme = theme;
+          document.documentElement.style.colorScheme = theme;
+          document.querySelector('meta[name="theme-color"]').content = theme === 'dark' ? '#101713' : '#f7f4ed';
+        } catch {
+          const theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          document.documentElement.dataset.theme = theme;
+          document.querySelector('meta[name="theme-color"]').content = theme === 'dark' ? '#101713' : '#f7f4ed';
+        }
+      })();
+    </script>
     <title>Common Ground — Cộng đồng thành viên</title>
   </head>
   <body>

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { MessageCircleMore, ShieldCheck, Sparkles, UsersRound } from 'lucide-react';
+import ThemeSwitcher from '../ui/ThemeSwitcher';
 
 export default function AuthLayout({ children, eyebrow, title, description }) {
   return (
@@ -22,6 +23,7 @@ export default function AuthLayout({ children, eyebrow, title, description }) {
         <div className="orb orb-two" />
       </section>
       <section className="form-panel">
+        <ThemeSwitcher className="auth-theme-switcher" />
         <div className="mobile-brand"><span className="brand-mark"><MessageCircleMore size={21} /></span> Common Ground</div>
         <div className="form-wrap">
           <p className="eyebrow">{eyebrow}</p>

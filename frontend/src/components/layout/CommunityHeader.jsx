@@ -2,6 +2,7 @@ import { Link, NavLink } from 'react-router-dom';
 import { LogOut, MessageCircleMore, PenLine, ShieldCheck, UserRound } from 'lucide-react';
 import { useLogout } from '../../features/auth/hooks/useAuth';
 import { useAuthStore } from '../../store/authStore';
+import ThemeSwitcher from '../ui/ThemeSwitcher';
 
 export default function CommunityHeader() {
   const logout = useLogout();
@@ -17,6 +18,7 @@ export default function CommunityHeader() {
           {user?.role === 'admin' && <NavLink to="/admin"><ShieldCheck size={16} /> Quản trị</NavLink>}
         </nav>
         <div className="account-menu">
+          <ThemeSwitcher />
           <Link className="account-link" to="/profile"><UserRound size={17} /><span>{displayName}</span></Link>
           <button className="icon-button" type="button" title="Đăng xuất" aria-label="Đăng xuất" onClick={() => logout.mutate()} disabled={logout.isPending}><LogOut size={18} /></button>
         </div>
