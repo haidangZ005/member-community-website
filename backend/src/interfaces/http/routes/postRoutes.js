@@ -1,12 +1,14 @@
 const express = require('express');
 const asyncHandler = require('../../../shared/utils/asyncHandler');
 const validateRequest = require('../middlewares/validateRequest');
-const { createPostSchema, updatePostSchema, createCommentSchema, postIdSchema, listPostsSchema } = require('../validators/postValidator');
+const { createPostSchema, updatePostSchema, createCommentSchema, postIdSchema, listPostsSchema, listCategoriesSchema } = require('../validators/postValidator');
+const { categorySchema } = require('../validators/adminValidator');
 
 function makePostRoutes(controller, authMiddleware) {
   const router = express.Router();
   router.use(authMiddleware);
-  router.get('/categories', asyncHandler(controller.listCategories));
+  router.get('/categories', validateRequest(listCategoriesSchema, 'query'), asyncHandler(controller.listCategories));
+  router.post('/categories', validateRequest(categorySchema), asyncHandler(controller.createCategory));
   router.get('/', validateRequest(listPostsSchema, 'query'), asyncHandler(controller.list));
   router.post('/', validateRequest(createPostSchema), asyncHandler(controller.create));
   router.get('/:id', validateRequest(postIdSchema, 'params'), asyncHandler(controller.getById));

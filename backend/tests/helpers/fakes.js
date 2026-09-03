@@ -88,7 +88,10 @@ class MemoryCategoryRepository {
     ];
   }
   async findById(id) { return this.categories.find((category) => category.id === id) || null; }
-  async list() { return [...this.categories]; }
+  async list({ search = '', limit } = {}) {
+    const matches = this.categories.filter((category) => category.name.toLowerCase().includes(search.toLowerCase()));
+    return limit ? matches.slice(0, limit) : matches;
+  }
   async findByName(name) { return this.categories.find((category) => category.name.toLowerCase() === name.toLowerCase()) || null; }
   async create(category) {
     const created = new Category({ ...category, id: crypto.randomUUID(), createdAt: new Date(), updatedAt: new Date() });
@@ -171,8 +174,9 @@ class MemoryPostRepository {
     this.posts.push(created);
     return this.hydrate(created, post.authorId);
   }
-  async list({ page, limit, categoryId, viewerId }) {
+  async list({ page, limit, categoryId, viewerId, sort = 'latest' }) {
     const filtered = this.posts.filter((post) => post.status === 'published' && (!categoryId || post.categoryId === categoryId));
+    if (sort === 'popular') filtered.sort((a, b) => this.likeRepository.likes.filter((like) => like.postId === b.id).length - this.likeRepository.likes.filter((like) => like.postId === a.id).length);
     const pageItems = filtered.slice((page - 1) * limit, page * limit);
     return { items: await Promise.all(pageItems.map((post) => this.hydrate(post, viewerId))), total: filtered.length };
   }

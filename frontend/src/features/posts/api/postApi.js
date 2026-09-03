@@ -8,5 +8,6 @@ export const postApi = {
   remove: async (id) => (await httpClient.delete(`/posts/${id}`)).data.data,
   like: async (id) => (await httpClient.post(`/posts/${id}/like`)).data.data,
   unlike: async (id) => (await httpClient.delete(`/posts/${id}/like`)).data.data,
-  categories: async () => (await httpClient.get('/posts/categories')).data.data,
+  categories: async (params) => (await httpClient.get('/posts/categories', { params })).data.data,
+  createCategory: async (input) => (await httpClient.post('/posts/categories', input)).data.data,
 };

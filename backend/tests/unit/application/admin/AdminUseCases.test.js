@@ -42,7 +42,8 @@ describe('Sprint 3 admin use cases', () => {
   });
 
   test('kiểm duyệt bài viết, bình luận và tổng hợp dashboard', async () => {
-    const post = await useCases.createPost.execute(member.id, { title: 'Bài viết cần kiểm tra', content: 'Nội dung đủ dài để thực hiện kiểm thử quản trị.' });
+    const [category] = await dependencies.categoryRepository.list();
+    const post = await useCases.createPost.execute(member.id, { title: 'Bài viết cần kiểm tra', content: 'Nội dung đủ dài để thực hiện kiểm thử quản trị.', categoryId: category.id });
     const comment = await useCases.createComment.execute(post.id, member.id, { content: 'Bình luận cần kiểm tra.' });
     expect((await useCases.adminListPosts.execute()).data).toHaveLength(1);
     expect((await useCases.adminListComments.execute()).data).toHaveLength(1);

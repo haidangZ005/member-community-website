@@ -5,7 +5,7 @@ import PostForm from '../../features/posts/components/PostForm';
 import { useCreatePost, usePost, useUpdatePost } from '../../features/posts/hooks/usePosts';
 import { useAuthStore } from '../../store/authStore';
 
-export default function PostEditorPage() {
+export default function PostEditorPage({ category = null }) {
   const { id } = useParams();
   const isEditing = Boolean(id);
   const post = usePost(id);
@@ -19,9 +19,9 @@ export default function PostEditorPage() {
   return (
     <div className="community-page"><CommunityHeader />
       <main className="editor-main">
-        <section className="editor-heading"><p className="eyebrow"><PenLine size={15} /> {isEditing ? 'Chỉnh sửa bài viết' : 'Cuộc trò chuyện mới'}</p><h1>{isEditing ? 'Làm rõ điều bạn muốn chia sẻ.' : 'Mang một ý tưởng đến cộng đồng.'}</h1><p>Viết chân thành, cung cấp đủ bối cảnh và để lại khoảng trống cho những góc nhìn khác.</p></section>
+        <section className="editor-heading"><p className="eyebrow"><PenLine size={15} /> {isEditing ? 'Chỉnh sửa bài viết' : category.name}</p><h1>{isEditing ? 'Làm rõ điều bạn muốn chia sẻ.' : `Tạo bài đăng trong ${category.name}.`}</h1><p>Viết chân thành, cung cấp đủ bối cảnh và để lại khoảng trống cho những góc nhìn khác.</p></section>
         {mutation.error && <div className="alert error editor-alert">{mutation.error.response?.data?.error?.message || 'Không thể lưu bài viết.'}</div>}
-        <PostForm initialValues={post.data} isPending={mutation.isPending} submitLabel={isEditing ? 'Lưu thay đổi' : 'Đăng bài viết'} onSubmit={(values) => mutation.mutate(isEditing ? { id, ...values } : values)} />
+        <PostForm initialValues={post.data} fixedCategory={isEditing ? null : category} isPending={mutation.isPending} submitLabel={isEditing ? 'Lưu thay đổi' : 'Tạo bài đăng'} onSubmit={(values) => mutation.mutate(isEditing ? { id, ...values } : values)} />
       </main>
     </div>
   );

@@ -17,7 +17,7 @@ export default function AdminLayout() {
       <CommunityHeader />
       <div className="admin-workspace">
         <aside className="admin-sidebar">
-          <div className="admin-sidebar-title"><span><ShieldCheck size={18} /></span><div><strong>Quản trị</strong><small>Common Ground</small></div></div>
+          <div className="admin-sidebar-title"><span><ShieldCheck size={18} /></span><div><strong>Quản trị</strong><small>VRUM</small></div></div>
           <nav aria-label="Điều hướng quản trị">{links.map((link) => <NavLink key={link.to} to={link.to} end={link.end}>{createElement(link.icon, { size: 18 })} {link.label}</NavLink>)}</nav>
           <p>Giữ cộng đồng an toàn, rõ ràng và đáng tin cậy.</p>
         </aside>

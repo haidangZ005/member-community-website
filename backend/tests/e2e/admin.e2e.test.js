@@ -32,8 +32,9 @@ describe('Admin API', () => {
     const adminLogin = await adminAgent.post('/api/auth/login').send({ email: 'admin@example.com', password: 'Admin12345' });
     adminAuthorization = `Bearer ${adminLogin.body.data.accessToken}`;
 
+    const [category] = await dependencies.categoryRepository.list();
     const post = await memberAgent.post('/api/posts').set('Authorization', memberAuthorization).send({
-      title: 'Bài viết dành cho kiểm duyệt', content: 'Nội dung bài viết được tạo để kiểm tra luồng quản trị.',
+      title: 'Bài viết dành cho kiểm duyệt', content: 'Nội dung bài viết được tạo để kiểm tra luồng quản trị.', categoryId: category.id,
     });
     postId = post.body.data.id;
     const comment = await memberAgent.post(`/api/posts/${postId}/comments`).set('Authorization', memberAuthorization).send({ content: 'Bình luận cho kiểm duyệt.' });

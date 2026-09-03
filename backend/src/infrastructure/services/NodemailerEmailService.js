@@ -17,7 +17,7 @@ class NodemailerEmailService {
     return this.transport.sendMail({
       from: env.SMTP_FROM,
       to: email,
-      subject: 'Đặt lại mật khẩu Common Ground',
+      subject: 'Đặt lại mật khẩu VRUM',
       text: `Xin chào ${fullName || 'bạn'}, mở liên kết sau để đặt lại mật khẩu (hiệu lực 30 phút): ${resetUrl}`,
     });
   }

@@ -20,10 +20,12 @@ describe('MVP journey', () => {
     }).expect(201);
     const memberLogin = await member.post('/api/auth/login').send({ email: 'new.member@example.com', password: 'Member12345' }).expect(200);
     const memberAuth = `Bearer ${memberLogin.body.data.accessToken}`;
+    const [category] = await dependencies.categoryRepository.list();
 
     const createdPost = await member.post('/api/posts').set('Authorization', memberAuth).send({
       title: 'Chia sẻ đầu tiên trong cộng đồng',
       content: 'Mình rất vui khi tham gia và muốn làm quen với mọi người.',
+      categoryId: category.id,
     }).expect(201);
     const postId = createdPost.body.data.id;
     const createdComment = await member.post(`/api/posts/${postId}/comments`).set('Authorization', memberAuth).send({

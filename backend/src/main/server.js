@@ -3,7 +3,7 @@ const env = require('../infrastructure/config/env');
 const pool = require('../infrastructure/database/postgres/connection');
 
 const server = createApp().listen(env.PORT, () => {
-  console.log(`Member Community API đang chạy tại http://localhost:${env.PORT}`);
+  console.log(`VRUM API đang chạy tại http://localhost:${env.PORT}`);
 });
 
 async function shutdown(signal) {

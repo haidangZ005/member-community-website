@@ -9,6 +9,7 @@ import PostListPage from '../../pages/posts/PostListPage';
 import PostDetailPage from '../../pages/posts/PostDetailPage';
 import PostEditorPage from '../../pages/posts/PostEditorPage';
 import CreatePostPage from '../../pages/posts/CreatePostPage';
+import CreateCommunityPage from '../../pages/posts/CreateCommunityPage';
 import AdminRoute from './AdminRoute';
 import AdminLayout from '../../components/admin/AdminLayout';
 import DashboardPage from '../../pages/admin/DashboardPage';
@@ -27,6 +28,7 @@ export default function AppRoutes() {
       <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
       <Route path="/posts" element={<ProtectedRoute><PostListPage /></ProtectedRoute>} />
       <Route path="/posts/new" element={<ProtectedRoute><CreatePostPage /></ProtectedRoute>} />
+      <Route path="/communities/new" element={<ProtectedRoute><CreateCommunityPage /></ProtectedRoute>} />
       <Route path="/posts/:id" element={<ProtectedRoute><PostDetailPage /></ProtectedRoute>} />
       <Route path="/posts/:id/edit" element={<ProtectedRoute><PostEditorPage /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute><AdminRoute><AdminLayout /></AdminRoute></ProtectedRoute>}>

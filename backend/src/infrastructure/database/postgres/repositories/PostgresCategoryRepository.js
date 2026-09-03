@@ -21,9 +21,14 @@ class PostgresCategoryRepository {
     return mapCategory(rows[0]);
   }
 
-  async list() {
+  async list({ search = '', limit = null } = {}) {
     const { rows } = await pool.query(
-      'SELECT id, name, description, created_at AS "createdAt", updated_at AS "updatedAt" FROM categories ORDER BY name ASC',
+      `SELECT id, name, description, created_at AS "createdAt", updated_at AS "updatedAt"
+       FROM categories
+       WHERE ($1 = '' OR name ILIKE $2)
+       ORDER BY name ASC
+       LIMIT $3`,
+      [search, `%${search}%`, limit],
     );
     return rows.map(mapCategory);
   }

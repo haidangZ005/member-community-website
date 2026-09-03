@@ -10,8 +10,20 @@ export function usePost(id) {
   return useQuery({ queryKey: ['post', id], queryFn: () => postApi.getById(id), enabled: Boolean(id) });
 }
 
-export function useCategories() {
-  return useQuery({ queryKey: ['categories'], queryFn: postApi.categories, staleTime: 5 * 60 * 1000 });
+export function useCategories(params, enabled = true) {
+  return useQuery({ queryKey: ['categories', params], queryFn: () => postApi.categories(params), staleTime: 5 * 60 * 1000, enabled });
+}
+
+export function useCreateCategory() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: postApi.createCategory,
+    onSuccess: (category) => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      navigate(`/posts?categoryId=${encodeURIComponent(category.id)}`);
+    },
+  });
 }
 
 export function useCreatePost() {

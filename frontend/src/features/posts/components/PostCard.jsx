@@ -12,7 +12,7 @@ export default function PostCard({ post }) {
       <div className="post-card-meta">
         <div className="mini-avatar">{authorName.slice(0, 1).toUpperCase()}</div>
         <div><strong>{authorName}</strong><span>{dateFormatter.format(new Date(post.createdAt))}</span></div>
-        <span className="category-chip">{post.category?.name || 'Chung'}</span>
+        {post.category ? <Link className="category-chip" to={`/posts?categoryId=${encodeURIComponent(post.category.id)}`}>{post.category.name}</Link> : <span className="category-chip">Chung</span>}
       </div>
       <Link className="post-card-link" to={`/posts/${post.id}`}>
         <h2>{post.title}</h2><p>{excerpt}</p>

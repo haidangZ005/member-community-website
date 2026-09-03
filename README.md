@@ -1,6 +1,10 @@
-# Common Ground
+# VRUM
 
-Common Ground là website cộng đồng gồm frontend React, API Express và PostgreSQL. Thành viên có thể đăng ký, cập nhật hồ sơ, đăng bài, bình luận và thích bài viết. Quản trị viên có dashboard để quản lý thành viên, nội dung và chuyên mục. Giao diện hỗ trợ chế độ sáng, tối và tự nhận diện theo thiết bị.
+> Làn gió mới của diễn đàn Việt — The Fresh Air of VN Forums.
+
+Đây là mã nguồn của **VRUM**, một diễn đàn cộng đồng hiện đại dành cho việc thảo luận, chia sẻ kiến thức và kết nối những người có cùng mối quan tâm. Thành viên có thể tạo tài khoản, cập nhật hồ sơ, đăng bài, bình luận và thích nội dung; quản trị viên có khu vực riêng để quản lý thành viên, bài viết, bình luận và chuyên mục.
+
+Dự án gồm frontend React, REST API Express và PostgreSQL. Giao diện hỗ trợ chế độ sáng, tối và tự nhận diện theo thiết bị.
 
 ## Cách hoạt động
 

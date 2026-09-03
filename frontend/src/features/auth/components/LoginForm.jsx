@@ -8,12 +8,20 @@ import { useLogin } from '../hooks/useAuth';
 
 export default function LoginForm() {
   const login = useLogin();
-  const { register, handleSubmit, formState: { errors } } = useForm({ resolver: zodResolver(loginSchema) });
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm({ resolver: zodResolver(loginSchema) });
   const apiError = login.error?.response?.data?.error?.message;
+  const submit = (event) => {
+    const formData = new FormData(event.currentTarget);
+    setValue('email', formData.get('email'));
+    setValue('password', formData.get('password'));
+    login.reset();
+    return handleSubmit((values) => login.mutate(values))(event);
+  };
+
   return (
-    <form className="auth-form" onSubmit={handleSubmit((values) => login.mutate(values))} noValidate>
+    <form className="auth-form" onSubmit={submit} noValidate>
       {apiError && <div className="alert error" role="alert">{apiError}</div>}
-      <FormField label="Email" icon={Mail} error={errors.email?.message}><input type="email" autoComplete="email" placeholder="Nhập địa chỉ email" {...register('email')} /></FormField>
+      <FormField label="Email" icon={Mail} error={errors.email?.message}><input type="email" autoComplete="username" placeholder="Nhập địa chỉ email" {...register('email')} /></FormField>
       <FormField label="Mật khẩu" icon={LockKeyhole} error={errors.password?.message}><input type="password" autoComplete="current-password" placeholder="Nhập mật khẩu" {...register('password')} /></FormField>
       <SubmitButton isPending={login.isPending}>Đăng nhập</SubmitButton>
     </form>

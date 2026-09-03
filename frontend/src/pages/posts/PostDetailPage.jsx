@@ -15,7 +15,7 @@ export default function PostDetailPage() {
   const user = useAuthStore((state) => state.user);
 
   if (post.isLoading) return <div className="page-loader">Đang mở cuộc trò chuyện…</div>;
-  if (post.error) return <div className="community-page"><CommunityHeader /><div className="detail-state"><h1>Không tìm thấy bài viết</h1><Link to="/posts"><ArrowLeft size={17} /> Trở lại cộng đồng</Link></div></div>;
+  if (post.error) return <div className="community-page"><CommunityHeader /><div className="detail-state"><h1>Không tìm thấy bài viết</h1><Link to="/posts"><ArrowLeft size={17} /> Trở lại bảng tin</Link></div></div>;
   const data = post.data;
   const isOwner = user?.id === data.authorId;
   const authorName = data.author?.fullName || data.author?.username || 'Thành viên';
@@ -23,9 +23,9 @@ export default function PostDetailPage() {
   return (
     <div className="community-page"><CommunityHeader />
       <main className="detail-main">
-        <Link className="back-to-feed" to="/posts"><ArrowLeft size={17} /> Trở lại cộng đồng</Link>
+        <Link className="back-to-feed" to="/posts"><ArrowLeft size={17} /> Trở lại bảng tin</Link>
         <article className="post-detail">
-          <div className="post-detail-top"><span className="category-chip">{data.category?.name || 'Chung'}</span>{isOwner && <div className="owner-actions"><Link to={`/posts/${id}/edit`}><Edit3 size={16} /> Sửa</Link><button type="button" disabled={remove.isPending} onClick={() => { if (window.confirm('Xóa bài viết này? Thao tác này không thể hoàn tác.')) remove.mutate(id); }}><Trash2 size={16} /> Xóa</button></div>}</div>
+          <div className="post-detail-top">{data.category ? <Link className="category-chip" to={`/posts?categoryId=${encodeURIComponent(data.category.id)}`}>{data.category.name}</Link> : <span className="category-chip">Chung</span>}{isOwner && <div className="owner-actions"><Link to={`/posts/${id}/edit`}><Edit3 size={16} /> Sửa</Link><button type="button" disabled={remove.isPending} onClick={() => { if (window.confirm('Xóa bài viết này? Thao tác này không thể hoàn tác.')) remove.mutate(id); }}><Trash2 size={16} /> Xóa</button></div>}</div>
           <h1>{data.title}</h1>
           <div className="detail-author"><div className="mini-avatar">{authorName.slice(0, 1).toUpperCase()}</div><div><strong>{authorName}</strong><time>{dateFormatter.format(new Date(data.createdAt))}</time></div></div>
           <div className="post-content">{data.content.split('\n').map((line, index) => <p key={`${index}-${line.slice(0, 12)}`}>{line || '\u00a0'}</p>)}</div>

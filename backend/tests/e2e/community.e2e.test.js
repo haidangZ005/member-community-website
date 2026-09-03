@@ -44,8 +44,33 @@ describe('Community API', () => {
 
   test('bảo vệ endpoint và validate nội dung', async () => {
     await request(app).get('/api/posts').expect(401);
+    await agent.post('/api/posts').set('Authorization', authorization).send({ title: 'Bài viết không có chủ đề', content: 'Nội dung này đủ dài nhưng chưa chọn chủ đề.' }).expect(422);
     await agent.post('/api/posts').set('Authorization', authorization).send({ title: 'x', content: 'ngắn' }).expect(422);
     await agent.post('/api/posts/00000000-0000-4000-8000-000000000000/comments').set('Authorization', authorization).send({ content: 'Nội dung bình luận' }).expect(404);
     await agent.get('/api/posts?page=0').set('Authorization', authorization).expect(422);
+  });
+
+  test('tìm chủ đề theo tên và lấy chủ đề theo id', async () => {
+    const search = await agent.get('/api/posts/categories').query({ search: 'hỏi', limit: 1 }).set('Authorization', authorization).expect(200);
+    expect(search.body.data).toHaveLength(1);
+    expect(search.body.data[0].name).toBe('Hỏi đáp');
+
+    await agent.get('/api/posts/categories').query({ id: search.body.data[0].id }).set('Authorization', authorization).expect(200)
+      .expect(({ body }) => expect(body.data[0].id).toBe(search.body.data[0].id));
+    await agent.get('/api/posts/categories').query({ limit: 0 }).set('Authorization', authorization).expect(422);
+  });
+
+  test('thành viên tạo cộng đồng và xem bài viết phổ biến', async () => {
+    const community = await agent.post('/api/posts/categories').set('Authorization', authorization)
+      .send({ name: 'Công nghệ Việt', description: 'Nơi chia sẻ sản phẩm và kiến thức công nghệ.' }).expect(201);
+    const first = await agent.post('/api/posts').set('Authorization', authorization)
+      .send({ title: 'Bài viết thứ nhất', content: 'Nội dung bài viết thứ nhất trong cộng đồng.', categoryId: community.body.data.id }).expect(201);
+    await agent.post('/api/posts').set('Authorization', authorization)
+      .send({ title: 'Bài viết thứ hai', content: 'Nội dung bài viết thứ hai trong cộng đồng.', categoryId: community.body.data.id }).expect(201);
+    await agent.post(`/api/posts/${first.body.data.id}/like`).set('Authorization', authorization).expect(200);
+
+    await agent.get('/api/posts').query({ sort: 'popular' }).set('Authorization', authorization).expect(200)
+      .expect(({ body }) => expect(body.data[0].id).toBe(first.body.data.id));
+    await agent.get('/api/posts').query({ sort: 'unknown' }).set('Authorization', authorization).expect(422);
   });
 });

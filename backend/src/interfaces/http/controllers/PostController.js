@@ -28,8 +28,16 @@ function makePostController(useCases, dependencies) {
     async createComment(req, res) {
       return res.status(201).json({ data: await useCases.createComment.execute(req.validatedParams.id, req.user.id, req.validatedBody) });
     },
-    async listCategories(_req, res) {
-      return res.json({ data: await dependencies.categoryRepository.list() });
+    async listCategories(req, res) {
+      const { id, search = '', limit } = req.validatedQuery;
+      if (id) {
+        const category = await dependencies.categoryRepository.findById(id);
+        return res.json({ data: category ? [category] : [] });
+      }
+      return res.json({ data: await dependencies.categoryRepository.list({ search, limit }) });
+    },
+    async createCategory(req, res) {
+      return res.status(201).json({ data: await useCases.createCategory.execute(req.validatedBody) });
     },
   };
 }

@@ -1,22 +1,36 @@
+import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { LogOut, MessageCircleMore, PenLine, ShieldCheck, UserRound } from 'lucide-react';
+import { LogOut, Search, ShieldCheck, UserRound } from 'lucide-react';
 import { useLogout } from '../../features/auth/hooks/useAuth';
+import { useCategories } from '../../features/posts/hooks/usePosts';
 import { useAuthStore } from '../../store/authStore';
 import ThemeSwitcher from '../ui/ThemeSwitcher';
+import BrandLogo from '../ui/BrandLogo';
 
 export default function CommunityHeader() {
   const logout = useLogout();
   const user = useAuthStore((state) => state.user);
   const displayName = user?.fullName || user?.username || 'Thành viên';
+  const [searchInput, setSearchInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const results = useCategories({ search: searchQuery, limit: 8 }, Boolean(searchQuery));
   return (
     <header className="community-header">
       <div className="community-header-inner">
-        <Link className="brand dark" to="/posts"><span className="brand-mark"><MessageCircleMore size={22} /></span><span>Common Ground</span></Link>
-        <nav className="community-nav" aria-label="Điều hướng chính">
-          <NavLink to="/posts">Cộng đồng</NavLink>
-          <NavLink to="/posts/new"><PenLine size={16} /> Viết bài</NavLink>
-          {user?.role === 'admin' && <NavLink to="/admin"><ShieldCheck size={16} /> Quản trị</NavLink>}
-        </nav>
+        <Link className="brand dark" to="/posts" aria-label="VRUM - Bảng tin"><BrandLogo /></Link>
+        <div className="header-search">
+          <form className="topic-search" role="search" onSubmit={(event) => { event.preventDefault(); setSearchQuery(searchInput.trim()); }}>
+            <button type="submit" aria-label="Tìm kiếm"><Search size={19} /></button>
+            <input type="search" value={searchInput} onChange={(event) => { setSearchInput(event.target.value); if (!event.target.value.trim()) setSearchQuery(''); }} placeholder="Tìm kiếm trong diễn đàn" aria-label="Tìm kiếm trong diễn đàn" />
+          </form>
+          {searchQuery && <div className="topic-results" aria-live="polite">
+            {results.isLoading && <p>Đang tìm cộng đồng…</p>}
+            {results.error && <p>Không thể tìm kiếm. Vui lòng thử lại.</p>}
+            {results.data?.map((item) => <Link key={item.id} to={`/posts?categoryId=${encodeURIComponent(item.id)}`} onClick={() => { setSearchInput(''); setSearchQuery(''); }}><strong>{item.name}</strong><span>{item.description || 'Xem các bài đăng trong cộng đồng này'}</span></Link>)}
+            {!results.isLoading && results.data?.length === 0 && <p>Không tìm thấy cộng đồng phù hợp.</p>}
+          </div>}
+        </div>
+        {user?.role === 'admin' && <nav className="community-nav" aria-label="Điều hướng quản trị"><NavLink to="/admin"><ShieldCheck size={16} /> Quản trị</NavLink></nav>}
         <div className="account-menu">
           <ThemeSwitcher />
           <Link className="account-link" to="/profile"><UserRound size={17} /><span>{displayName}</span></Link>

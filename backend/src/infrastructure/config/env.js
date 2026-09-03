@@ -18,7 +18,7 @@ const schema = z.object({
   SMTP_PORT: z.coerce.number().default(587),
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
-  SMTP_FROM: z.string().default('Member Community <no-reply@membercommunity.local>'),
+  SMTP_FROM: z.string().default('VRUM <no-reply@vrum.local>'),
   CLIENT_URL: z.url().default('http://localhost:5173'),
   ADMIN_EMAIL: z.preprocess((value) => value === '' ? undefined : value, z.email().optional()),
   ADMIN_USERNAME: z.preprocess((value) => value === '' ? undefined : value, z.string().min(3).max(50).optional()),

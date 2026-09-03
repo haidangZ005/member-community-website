@@ -45,14 +45,15 @@ class PostgresPostRepository {
     return this.findById(rows[0].id, post.authorId);
   }
 
-  async list({ page, limit, categoryId, viewerId }) {
+  async list({ page, limit, categoryId, viewerId, sort = 'latest' }) {
     const offset = (page - 1) * limit;
     const params = [viewerId, categoryId, limit, offset];
+    const orderBy = sort === 'popular' ? 'like_count DESC, comment_count DESC, p.created_at DESC' : 'p.created_at DESC';
     const [itemsResult, countResult] = await Promise.all([
       pool.query(
         `${baseSelect}
          WHERE p.status = 'published' AND ($2::uuid IS NULL OR p.category_id = $2)
-         ORDER BY p.created_at DESC LIMIT $3 OFFSET $4`,
+         ORDER BY ${orderBy} LIMIT $3 OFFSET $4`,
         params,
       ),
       pool.query(
