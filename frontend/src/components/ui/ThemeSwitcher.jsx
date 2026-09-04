@@ -3,11 +3,11 @@ import { Monitor, Moon, Sun } from 'lucide-react';
 import { resolveTheme } from '../../utils/theme';
 import CustomSelect from './CustomSelect';
 
-const STORAGE_KEY = 'common-ground-theme';
+const STORAGE_KEY = 'vrum-theme';
 const options = [
   { value: 'light', label: 'Sáng', icon: Sun },
   { value: 'dark', label: 'Tối', icon: Moon },
-  { value: 'system', label: 'Theo thiết bị', icon: Monitor },
+  { value: 'system', label: 'Theo hệ thống', icon: Monitor },
 ];
 
 function readPreference() {
@@ -28,7 +28,7 @@ export default function ThemeSwitcher({ className = '' }) {
       const theme = resolveTheme(preference, media.matches);
       document.documentElement.dataset.theme = theme;
       document.documentElement.style.colorScheme = theme;
-      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#101713' : '#f7f4ed');
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#09090b' : '#f7f4ed');
     };
     applyTheme();
     media.addEventListener('change', applyTheme);

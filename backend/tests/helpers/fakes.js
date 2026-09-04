@@ -82,21 +82,33 @@ class FakeEmailService {
 class MemoryCategoryRepository {
   constructor() {
     const now = new Date();
+    this.memberships = [];
     this.categories = [
       new Category({ id: crypto.randomUUID(), name: 'Hỏi đáp', description: 'Cùng nhau giải đáp', createdAt: now, updatedAt: now }),
       new Category({ id: crypto.randomUUID(), name: 'Chia sẻ', description: 'Kinh nghiệm thành viên', createdAt: now, updatedAt: now }),
     ];
   }
-  async findById(id) { return this.categories.find((category) => category.id === id) || null; }
-  async list({ search = '', limit, ownerId = null } = {}) {
-    const matches = this.categories.filter((category) => category.name.toLowerCase().includes(search.toLowerCase()) && (!ownerId || category.ownerId === ownerId));
+  hydrate(category, viewerId = null) {
+    if (!category) return null;
+    const membership = this.memberships.find((item) => item.categoryId === category.id && item.userId === viewerId);
+    return new Category({ ...category.toJSON(), joinedByCurrentUser: Boolean(membership), favoriteByCurrentUser: Boolean(membership?.favorite) });
+  }
+  async findById(id, viewerId = null) { return this.hydrate(this.categories.find((category) => category.id === id), viewerId); }
+  async list({ search = '', limit, ownerId = null, viewerId = null, joinedOnly = false, favoritesOnly = false } = {}) {
+    const matches = this.categories.filter((category) => {
+      const membership = this.memberships.find((item) => item.categoryId === category.id && item.userId === viewerId);
+      return category.name.toLowerCase().includes(search.toLowerCase()) && (!ownerId || category.ownerId === ownerId)
+        && (!joinedOnly || membership) && (!favoritesOnly || membership?.favorite);
+    }).map((category) => this.hydrate(category, viewerId));
+    matches.sort((a, b) => Number(b.favoriteByCurrentUser) - Number(a.favoriteByCurrentUser) || a.name.localeCompare(b.name));
     return limit ? matches.slice(0, limit) : matches;
   }
   async findByName(name) { return this.categories.find((category) => category.name.toLowerCase() === name.toLowerCase()) || null; }
   async create(category) {
     const created = new Category({ ...category, id: crypto.randomUUID(), createdAt: new Date(), updatedAt: new Date() });
     this.categories.push(created);
-    return created;
+    if (created.ownerId) this.memberships.push({ categoryId: created.id, userId: created.ownerId, favorite: false });
+    return this.hydrate(created, created.ownerId);
   }
   async update(id, changes) {
     const index = this.categories.findIndex((category) => category.id === id);
@@ -104,7 +116,23 @@ class MemoryCategoryRepository {
     this.categories[index] = updated;
     return updated;
   }
-  async remove(id) { this.categories = this.categories.filter((category) => category.id !== id); }
+  async remove(id) {
+    this.categories = this.categories.filter((category) => category.id !== id);
+    this.memberships = this.memberships.filter((item) => item.categoryId !== id);
+  }
+  async join(categoryId, userId) {
+    if (!this.memberships.some((item) => item.categoryId === categoryId && item.userId === userId)) this.memberships.push({ categoryId, userId, favorite: false });
+    return this.findById(categoryId, userId);
+  }
+  async leave(categoryId, userId) {
+    this.memberships = this.memberships.filter((item) => item.categoryId !== categoryId || item.userId !== userId);
+    return this.findById(categoryId, userId);
+  }
+  async setFavorite(categoryId, userId, favorite) {
+    await this.join(categoryId, userId);
+    this.memberships.find((item) => item.categoryId === categoryId && item.userId === userId).favorite = favorite;
+    return this.findById(categoryId, userId);
+  }
   async count() { return this.categories.length; }
 }
 

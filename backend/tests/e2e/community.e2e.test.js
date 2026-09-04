@@ -60,10 +60,28 @@ describe('Community API', () => {
     await agent.get('/api/posts/categories').query({ limit: 0 }).set('Authorization', authorization).expect(422);
   });
 
+  test('tham gia, yêu thích và rời cộng đồng', async () => {
+    const categories = await agent.get('/api/posts/categories').set('Authorization', authorization).expect(200);
+    const categoryId = categories.body.data[0].id;
+
+    await agent.post(`/api/posts/categories/${categoryId}/join`).set('Authorization', authorization).expect(200)
+      .expect(({ body }) => expect(body.data).toMatchObject({ joinedByCurrentUser: true, favoriteByCurrentUser: false }));
+    await agent.post(`/api/posts/categories/${categoryId}/favorite`).set('Authorization', authorization).expect(200)
+      .expect(({ body }) => expect(body.data.favoriteByCurrentUser).toBe(true));
+    await agent.get('/api/posts/categories').query({ favorites: 'true' }).set('Authorization', authorization).expect(200)
+      .expect(({ body }) => expect(body.data.map((item) => item.id)).toEqual([categoryId]));
+    await agent.delete(`/api/posts/categories/${categoryId}/favorite`).set('Authorization', authorization).expect(200)
+      .expect(({ body }) => expect(body.data).toMatchObject({ joinedByCurrentUser: true, favoriteByCurrentUser: false }));
+    await agent.delete(`/api/posts/categories/${categoryId}/join`).set('Authorization', authorization).expect(200)
+      .expect(({ body }) => expect(body.data.joinedByCurrentUser).toBe(false));
+    await agent.get('/api/posts/categories').query({ joined: 'true' }).set('Authorization', authorization).expect(200)
+      .expect(({ body }) => expect(body.data).toHaveLength(0));
+  });
+
   test('thành viên tạo cộng đồng và xem bài viết phổ biến', async () => {
     const community = await agent.post('/api/posts/categories').set('Authorization', authorization)
       .send({ name: 'Công nghệ Việt', description: 'Nơi chia sẻ sản phẩm và kiến thức công nghệ.' }).expect(201);
-    expect(community.body.data.ownerId).toBeTruthy();
+    expect(community.body.data).toMatchObject({ ownerId: expect.any(String), joinedByCurrentUser: true, favoriteByCurrentUser: false });
     await agent.get('/api/posts/categories').query({ mine: 'true' }).set('Authorization', authorization).expect(200)
       .expect(({ body }) => expect(body.data.map((item) => item.id)).toEqual([community.body.data.id]));
     await agent.put(`/api/posts/categories/${community.body.data.id}`).set('Authorization', authorization)

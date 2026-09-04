@@ -1,3 +1,10 @@
+const NotFoundError = require('../../../domain/errors/NotFoundError');
+
+async function ensureCategory(categoryRepository, id) {
+  const category = await categoryRepository.findById(id);
+  if (!category) throw new NotFoundError('Không tìm thấy cộng đồng');
+}
+
 function makePostController(useCases, dependencies) {
   return {
     async list(req, res) {
@@ -29,12 +36,19 @@ function makePostController(useCases, dependencies) {
       return res.status(201).json({ data: await useCases.createComment.execute(req.validatedParams.id, req.user.id, req.validatedBody) });
     },
     async listCategories(req, res) {
-      const { id, search = '', limit, mine } = req.validatedQuery;
+      const { id, search = '', limit, mine, joined, favorites } = req.validatedQuery;
       if (id) {
-        const category = await dependencies.categoryRepository.findById(id);
+        const category = await dependencies.categoryRepository.findById(id, req.user.id);
         return res.json({ data: category ? [category] : [] });
       }
-      return res.json({ data: await dependencies.categoryRepository.list({ search, limit, ownerId: mine ? req.user.id : null }) });
+      return res.json({ data: await dependencies.categoryRepository.list({
+        search,
+        limit,
+        ownerId: mine ? req.user.id : null,
+        viewerId: req.user.id,
+        joinedOnly: Boolean(joined || favorites),
+        favoritesOnly: Boolean(favorites),
+      }) });
     },
     async createCategory(req, res) {
       return res.status(201).json({ data: await useCases.createCategory.execute(req.validatedBody, req.user.id) });
@@ -44,6 +58,22 @@ function makePostController(useCases, dependencies) {
     },
     async deleteCategory(req, res) {
       return res.json({ data: await useCases.deleteCategory.execute(req.validatedParams.id, req.user.id) });
+    },
+    async joinCategory(req, res) {
+      await ensureCategory(dependencies.categoryRepository, req.validatedParams.id);
+      return res.json({ data: await dependencies.categoryRepository.join(req.validatedParams.id, req.user.id) });
+    },
+    async leaveCategory(req, res) {
+      await ensureCategory(dependencies.categoryRepository, req.validatedParams.id);
+      return res.json({ data: await dependencies.categoryRepository.leave(req.validatedParams.id, req.user.id) });
+    },
+    async favoriteCategory(req, res) {
+      await ensureCategory(dependencies.categoryRepository, req.validatedParams.id);
+      return res.json({ data: await dependencies.categoryRepository.setFavorite(req.validatedParams.id, req.user.id, true) });
+    },
+    async unfavoriteCategory(req, res) {
+      await ensureCategory(dependencies.categoryRepository, req.validatedParams.id);
+      return res.json({ data: await dependencies.categoryRepository.setFavorite(req.validatedParams.id, req.user.id, false) });
     },
   };
 }

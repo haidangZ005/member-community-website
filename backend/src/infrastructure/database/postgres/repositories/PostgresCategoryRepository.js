@@ -8,29 +8,39 @@ function mapCategory(row) {
     name: row.name,
     description: row.description,
     ownerId: row.owner_id ?? row.ownerId,
+    joinedByCurrentUser: row.joined_by_current_user ?? row.joinedByCurrentUser,
+    favoriteByCurrentUser: row.favorite_by_current_user ?? row.favoriteByCurrentUser,
     createdAt: row.created_at ?? row.createdAt,
     updatedAt: row.updated_at ?? row.updatedAt,
   });
 }
 
 class PostgresCategoryRepository {
-  async findById(id) {
+  async findById(id, viewerId = null) {
     const { rows } = await pool.query(
-      'SELECT id, name, description, owner_id AS "ownerId", created_at AS "createdAt", updated_at AS "updatedAt" FROM categories WHERE id = $1',
-      [id],
+      `SELECT c.id, c.name, c.description, c.owner_id AS "ownerId", c.created_at AS "createdAt", c.updated_at AS "updatedAt",
+              (cm.user_id IS NOT NULL) AS "joinedByCurrentUser", COALESCE(cm.is_favorite, FALSE) AS "favoriteByCurrentUser"
+       FROM categories c
+       LEFT JOIN community_memberships cm ON cm.category_id = c.id AND cm.user_id = $2::uuid
+       WHERE c.id = $1`,
+      [id, viewerId],
     );
     return mapCategory(rows[0]);
   }
 
-  async list({ search = '', limit = null, ownerId = null } = {}) {
+  async list({ search = '', limit = null, ownerId = null, viewerId = null, joinedOnly = false, favoritesOnly = false } = {}) {
     const { rows } = await pool.query(
-      `SELECT id, name, description, owner_id AS "ownerId", created_at AS "createdAt", updated_at AS "updatedAt"
-       FROM categories
-       WHERE ($1 = '' OR name ILIKE $2)
-         AND ($4::uuid IS NULL OR owner_id = $4)
-       ORDER BY name ASC
+      `SELECT c.id, c.name, c.description, c.owner_id AS "ownerId", c.created_at AS "createdAt", c.updated_at AS "updatedAt",
+              (cm.user_id IS NOT NULL) AS "joinedByCurrentUser", COALESCE(cm.is_favorite, FALSE) AS "favoriteByCurrentUser"
+       FROM categories c
+       LEFT JOIN community_memberships cm ON cm.category_id = c.id AND cm.user_id = $5::uuid
+       WHERE ($1 = '' OR c.name ILIKE $2)
+         AND ($4::uuid IS NULL OR c.owner_id = $4)
+         AND ($6::boolean = FALSE OR cm.user_id IS NOT NULL)
+         AND ($7::boolean = FALSE OR cm.is_favorite = TRUE)
+       ORDER BY COALESCE(cm.is_favorite, FALSE) DESC, c.name ASC
        LIMIT $3`,
-      [search, `%${search}%`, limit, ownerId],
+      [search, `%${search}%`, limit, ownerId, viewerId, joinedOnly, favoritesOnly],
     );
     return rows.map(mapCategory);
   }
@@ -42,10 +52,16 @@ class PostgresCategoryRepository {
 
   async create(category) {
     const { rows } = await pool.query(
-      'INSERT INTO categories (name, description, owner_id) VALUES ($1, $2, $3) RETURNING *',
+      `WITH created AS (
+         INSERT INTO categories (name, description, owner_id) VALUES ($1, $2, $3) RETURNING *
+       ), joined AS (
+         INSERT INTO community_memberships (user_id, category_id)
+         SELECT owner_id, id FROM created WHERE owner_id IS NOT NULL
+       )
+       SELECT * FROM created`,
       [category.name, category.description, category.ownerId],
     );
-    return mapCategory(rows[0]);
+    return this.findById(rows[0].id, category.ownerId);
   }
 
   async update(id, category) {
@@ -58,6 +74,32 @@ class PostgresCategoryRepository {
 
   async remove(id) {
     await pool.query('DELETE FROM categories WHERE id = $1', [id]);
+  }
+
+  async join(categoryId, userId) {
+    await pool.query(
+      'INSERT INTO community_memberships (user_id, category_id) VALUES ($1, $2) ON CONFLICT (user_id, category_id) DO NOTHING',
+      [userId, categoryId],
+    );
+    return this.findById(categoryId, userId);
+  }
+
+  async leave(categoryId, userId) {
+    await pool.query('DELETE FROM community_memberships WHERE user_id = $1 AND category_id = $2', [userId, categoryId]);
+    return this.findById(categoryId, userId);
+  }
+
+  async setFavorite(categoryId, userId, favorite) {
+    if (favorite) {
+      await pool.query(
+        `INSERT INTO community_memberships (user_id, category_id, is_favorite) VALUES ($1, $2, TRUE)
+         ON CONFLICT (user_id, category_id) DO UPDATE SET is_favorite = TRUE`,
+        [userId, categoryId],
+      );
+    } else {
+      await pool.query('UPDATE community_memberships SET is_favorite = FALSE WHERE user_id = $1 AND category_id = $2', [userId, categoryId]);
+    }
+    return this.findById(categoryId, userId);
   }
 
   async count() {

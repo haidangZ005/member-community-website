@@ -10,6 +10,6 @@ export const postApi = {
   unlike: async (id) => (await httpClient.delete(`/posts/${id}/like`)).data.data,
   categories: async (params) => (await httpClient.get('/posts/categories', { params })).data.data,
   createCategory: async (input) => (await httpClient.post('/posts/categories', input)).data.data,
-  updateCategory: async ({ id, ...input }) => (await httpClient.put(`/posts/categories/${id}`, input)).data.data,
-  deleteCategory: async (id) => (await httpClient.delete(`/posts/categories/${id}`)).data.data,
+  setCategoryJoined: async ({ id, joined }) => (await httpClient[joined ? 'post' : 'delete'](`/posts/categories/${id}/join`)).data.data,
+  setCategoryFavorite: async ({ id, favorite }) => (await httpClient[favorite ? 'post' : 'delete'](`/posts/categories/${id}/favorite`)).data.data,
 };

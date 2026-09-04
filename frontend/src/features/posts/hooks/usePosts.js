@@ -27,19 +27,12 @@ export function useCreateCategory() {
   });
 }
 
-export function useMyCategories() {
-  return useQuery({ queryKey: ['my-categories'], queryFn: () => postApi.categories({ mine: 'true' }) });
-}
-
-export function useManageCategory() {
+export function useCommunityActions() {
   const queryClient = useQueryClient();
-  const refresh = () => {
-    queryClient.invalidateQueries({ queryKey: ['categories'] });
-    queryClient.invalidateQueries({ queryKey: ['my-categories'] });
-  };
+  const refresh = () => queryClient.invalidateQueries({ queryKey: ['categories'] });
   return {
-    update: useMutation({ mutationFn: postApi.updateCategory, onSuccess: refresh }),
-    remove: useMutation({ mutationFn: postApi.deleteCategory, onSuccess: refresh }),
+    membership: useMutation({ mutationFn: postApi.setCategoryJoined, onSuccess: refresh }),
+    favorite: useMutation({ mutationFn: postApi.setCategoryFavorite, onSuccess: refresh }),
   };
 }
 

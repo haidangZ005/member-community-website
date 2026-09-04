@@ -31,6 +31,8 @@ const listCategoriesSchema = z.object({
   search: z.string().trim().max(100, 'Từ khóa tối đa 100 ký tự').optional(),
   limit: z.coerce.number().int().positive('Giới hạn phải lớn hơn 0').max(20, 'Tối đa 20 chủ đề').optional(),
   mine: z.literal('true').optional(),
+  joined: z.literal('true').optional(),
+  favorites: z.literal('true').optional(),
 });
 
 module.exports = { createPostSchema, updatePostSchema, createCommentSchema, postIdSchema, categoryIdSchema, listPostsSchema, listCategoriesSchema };

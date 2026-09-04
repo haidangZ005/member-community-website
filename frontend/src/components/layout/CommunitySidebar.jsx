@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Home, Plus, Settings, TrendingUp } from 'lucide-react';
+import { Home, Plus, Settings, Star, TrendingUp } from 'lucide-react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
+import { useCategories } from '../../features/posts/hooks/usePosts';
 import { useAuthStore } from '../../store/authStore';
 import { readRecentCommunities, rememberCommunity } from '../../utils/recentCommunities';
 
@@ -12,6 +13,7 @@ export default function CommunitySidebar({ selectedCategory = null }) {
   const sort = searchParams.get('sort') === 'popular' ? 'popular' : 'latest';
   const recentKey = `vrum.recentCommunities.${user?.id || 'guest'}`;
   const [recentCommunities, setRecentCommunities] = useState(() => readRecentCommunities(window.localStorage, recentKey));
+  const favorites = useCategories({ favorites: 'true', limit: 10 });
 
   useEffect(() => {
     if (selectedCategory?.id) {
@@ -36,6 +38,7 @@ export default function CommunitySidebar({ selectedCategory = null }) {
         <h2>Cộng đồng</h2>
         <nav aria-label="Cộng đồng của bạn">
           <Link className={location.pathname === '/communities/manage' ? 'active' : ''} to="/communities/manage"><Settings size={19} /> Quản lý cộng đồng</Link>
+          {favorites.data?.map((item) => <Link className={categoryId === item.id ? 'active' : ''} key={item.id} to={`/posts?categoryId=${encodeURIComponent(item.id)}`}><span className="community-mark" aria-hidden="true">{item.name.charAt(0).toUpperCase()}</span><span>{item.name}</span><Star className="sidebar-favorite" size={14} fill="currentColor" aria-label="Yêu thích" /></Link>)}
         </nav>
       </section>
     </aside>

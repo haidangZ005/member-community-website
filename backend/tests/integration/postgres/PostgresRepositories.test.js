@@ -38,7 +38,7 @@ describeIntegration('PostgreSQL repositories', () => {
 
   beforeAll(async () => { await applyMigrations(); });
   beforeEach(async () => {
-    await pool.query('TRUNCATE likes, comments, posts, categories, password_reset_tokens, refresh_tokens, users CASCADE');
+    await pool.query('TRUNCATE community_memberships, likes, comments, posts, categories, password_reset_tokens, refresh_tokens, users CASCADE');
   });
   afterAll(async () => { await pool.end(); });
 
@@ -58,6 +58,9 @@ describeIntegration('PostgreSQL repositories', () => {
     }));
     const category = await categories.create(new Category({ name: 'Kiểm thử', description: 'Dữ liệu tích hợp', ownerId: author.id }));
     expect((await categories.list({ ownerId: author.id }))[0].id).toBe(category.id);
+    expect((await categories.list({ viewerId: author.id, joinedOnly: true }))[0]).toMatchObject({ id: category.id, joinedByCurrentUser: true });
+    await categories.setFavorite(category.id, author.id, true);
+    expect((await categories.list({ viewerId: author.id, favoritesOnly: true }))[0].favoriteByCurrentUser).toBe(true);
     const post = await posts.create(new Post({
       authorId: author.id, categoryId: category.id, title: 'Bài viết kiểm thử repository', content: 'Nội dung được lưu trực tiếp vào PostgreSQL thật.',
     }));

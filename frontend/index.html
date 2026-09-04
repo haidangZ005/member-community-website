@@ -9,18 +9,18 @@
     <script>
       (() => {
         try {
-          const saved = localStorage.getItem('common-ground-theme');
+          const saved = localStorage.getItem('vrum-theme');
           const preference = ['light', 'dark', 'system'].includes(saved) ? saved : 'system';
           const theme = preference === 'system'
             ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
             : preference;
           document.documentElement.dataset.theme = theme;
           document.documentElement.style.colorScheme = theme;
-          document.querySelector('meta[name="theme-color"]').content = theme === 'dark' ? '#101713' : '#f7f4ed';
+          document.querySelector('meta[name="theme-color"]').content = theme === 'dark' ? '#09090b' : '#f7f4ed';
         } catch {
           const theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
           document.documentElement.dataset.theme = theme;
-          document.querySelector('meta[name="theme-color"]').content = theme === 'dark' ? '#101713' : '#f7f4ed';
+          document.querySelector('meta[name="theme-color"]').content = theme === 'dark' ? '#09090b' : '#f7f4ed';
         }
       })();
     </script>

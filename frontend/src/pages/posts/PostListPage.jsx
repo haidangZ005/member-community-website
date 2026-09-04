@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft, ArrowRight, PenLine, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowRight, PenLine, Sparkles, Star } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import CommunityHeader from '../../components/layout/CommunityHeader';
 import CommunitySidebar from '../../components/layout/CommunitySidebar';
 import PostCard from '../../features/posts/components/PostCard';
-import { useCategories, usePosts } from '../../features/posts/hooks/usePosts';
+import { useCategories, useCommunityActions, usePosts } from '../../features/posts/hooks/usePosts';
 
 export default function PostListPage() {
   const [page, setPage] = useState(1);
@@ -14,6 +14,7 @@ export default function PostListPage() {
   const posts = usePosts({ page, limit: 8, categoryId: categoryId || undefined, sort });
   const category = useCategories({ id: categoryId }, Boolean(categoryId));
   const selectedCategory = category.data?.[0];
+  const communityActions = useCommunityActions();
   const createPostUrl = selectedCategory ? `/posts/new?categoryId=${encodeURIComponent(selectedCategory.id)}` : null;
 
   useEffect(() => {
@@ -25,7 +26,7 @@ export default function PostListPage() {
       <div className="community-shell">
         <CommunitySidebar selectedCategory={selectedCategory} />
         <main className="community-main">
-        {selectedCategory && <section className="topic-hero"><div><h1>{selectedCategory.name}</h1><p>{selectedCategory.description}</p></div>{createPostUrl && <Link className="primary-button create-button" to={createPostUrl}><PenLine size={18} /> Tạo bài đăng</Link>}</section>}
+        {selectedCategory && <><section className="topic-hero"><div><h1>{selectedCategory.name}</h1><p>{selectedCategory.description}</p></div><div className="topic-hero-actions">{selectedCategory.joinedByCurrentUser && <button className={`favorite-button ${selectedCategory.favoriteByCurrentUser ? 'active' : ''}`} type="button" title={selectedCategory.favoriteByCurrentUser ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'} aria-label={selectedCategory.favoriteByCurrentUser ? `Bỏ yêu thích ${selectedCategory.name}` : `Yêu thích ${selectedCategory.name}`} aria-pressed={selectedCategory.favoriteByCurrentUser} disabled={communityActions.favorite.isPending} onClick={() => communityActions.favorite.mutate({ id: selectedCategory.id, favorite: !selectedCategory.favoriteByCurrentUser })}><Star size={19} fill={selectedCategory.favoriteByCurrentUser ? 'currentColor' : 'none'} /></button>}<button className={`membership-button ${selectedCategory.joinedByCurrentUser ? 'joined' : ''}`} type="button" disabled={communityActions.membership.isPending} onClick={() => communityActions.membership.mutate({ id: selectedCategory.id, joined: !selectedCategory.joinedByCurrentUser })}>{selectedCategory.joinedByCurrentUser ? 'Đã tham gia' : 'Tham gia'}</button>{createPostUrl && <Link className="primary-button create-button" to={createPostUrl}><PenLine size={18} /> Tạo bài đăng</Link>}</div></section>{(communityActions.favorite.error || communityActions.membership.error) && <div className="alert error community-action-error">Không thể cập nhật cộng đồng. Vui lòng thử lại.</div>}</>}
         <section className="feed-column" aria-live="polite">
           <div className="feed-heading"><div><h2>{selectedCategory ? `Bài đăng trong ${selectedCategory.name}` : sort === 'popular' ? 'Phổ biến trên VRUM' : 'Bài đăng mới nhất'}</h2><p>{posts.data?.meta.total || 0} bài đăng</p></div><span className="live-pill">● {sort === 'popular' ? 'Nổi bật' : 'Mới nhất'}</span></div>
           {posts.isLoading && <div className="feed-state">Đang tải những cuộc trò chuyện mới…</div>}

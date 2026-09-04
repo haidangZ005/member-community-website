@@ -11,6 +11,10 @@ function makePostRoutes(controller, authMiddleware) {
   router.post('/categories', validateRequest(categorySchema), asyncHandler(controller.createCategory));
   router.put('/categories/:id', validateRequest(categoryIdSchema, 'params'), validateRequest(categorySchema), asyncHandler(controller.updateCategory));
   router.delete('/categories/:id', validateRequest(categoryIdSchema, 'params'), asyncHandler(controller.deleteCategory));
+  router.post('/categories/:id/join', validateRequest(categoryIdSchema, 'params'), asyncHandler(controller.joinCategory));
+  router.delete('/categories/:id/join', validateRequest(categoryIdSchema, 'params'), asyncHandler(controller.leaveCategory));
+  router.post('/categories/:id/favorite', validateRequest(categoryIdSchema, 'params'), asyncHandler(controller.favoriteCategory));
+  router.delete('/categories/:id/favorite', validateRequest(categoryIdSchema, 'params'), asyncHandler(controller.unfavoriteCategory));
   router.get('/', validateRequest(listPostsSchema, 'query'), asyncHandler(controller.list));
   router.post('/', validateRequest(createPostSchema), asyncHandler(controller.create));
   router.get('/:id', validateRequest(postIdSchema, 'params'), asyncHandler(controller.getById));
