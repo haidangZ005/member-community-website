@@ -29,15 +29,21 @@ function makePostController(useCases, dependencies) {
       return res.status(201).json({ data: await useCases.createComment.execute(req.validatedParams.id, req.user.id, req.validatedBody) });
     },
     async listCategories(req, res) {
-      const { id, search = '', limit } = req.validatedQuery;
+      const { id, search = '', limit, mine } = req.validatedQuery;
       if (id) {
         const category = await dependencies.categoryRepository.findById(id);
         return res.json({ data: category ? [category] : [] });
       }
-      return res.json({ data: await dependencies.categoryRepository.list({ search, limit }) });
+      return res.json({ data: await dependencies.categoryRepository.list({ search, limit, ownerId: mine ? req.user.id : null }) });
     },
     async createCategory(req, res) {
-      return res.status(201).json({ data: await useCases.createCategory.execute(req.validatedBody) });
+      return res.status(201).json({ data: await useCases.createCategory.execute(req.validatedBody, req.user.id) });
+    },
+    async updateCategory(req, res) {
+      return res.json({ data: await useCases.updateCategory.execute(req.validatedParams.id, req.validatedBody, req.user.id) });
+    },
+    async deleteCategory(req, res) {
+      return res.json({ data: await useCases.deleteCategory.execute(req.validatedParams.id, req.user.id) });
     },
   };
 }

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft, ArrowRight, Home, PenLine, Plus, Sparkles, TrendingUp } from 'lucide-react';
+import { ArrowLeft, ArrowRight, PenLine, Sparkles } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import CommunityHeader from '../../components/layout/CommunityHeader';
+import CommunitySidebar from '../../components/layout/CommunitySidebar';
 import PostCard from '../../features/posts/components/PostCard';
 import { useCategories, usePosts } from '../../features/posts/hooks/usePosts';
 
@@ -22,13 +23,7 @@ export default function PostListPage() {
   return (
     <div className="community-page"><CommunityHeader />
       <div className="community-shell">
-        <aside className="community-sidebar">
-          <nav aria-label="Điều hướng diễn đàn">
-            <Link className={!categoryId && sort === 'latest' ? 'active' : ''} to="/posts"><Home size={19} /> Trang chủ</Link>
-            <Link className={!categoryId && sort === 'popular' ? 'active' : ''} to="/posts?sort=popular"><TrendingUp size={19} /> Phổ biến</Link>
-            <Link to="/communities/new"><Plus size={20} /> Bắt đầu một cộng đồng</Link>
-          </nav>
-        </aside>
+        <CommunitySidebar selectedCategory={selectedCategory} />
         <main className="community-main">
         {selectedCategory && <section className="topic-hero"><div><h1>{selectedCategory.name}</h1><p>{selectedCategory.description}</p></div>{createPostUrl && <Link className="primary-button create-button" to={createPostUrl}><PenLine size={18} /> Tạo bài đăng</Link>}</section>}
         <section className="feed-column" aria-live="polite">

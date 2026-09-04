@@ -7,6 +7,7 @@ function mapCategory(row) {
     id: row.id,
     name: row.name,
     description: row.description,
+    ownerId: row.owner_id ?? row.ownerId,
     createdAt: row.created_at ?? row.createdAt,
     updatedAt: row.updated_at ?? row.updatedAt,
   });
@@ -15,20 +16,21 @@ function mapCategory(row) {
 class PostgresCategoryRepository {
   async findById(id) {
     const { rows } = await pool.query(
-      'SELECT id, name, description, created_at AS "createdAt", updated_at AS "updatedAt" FROM categories WHERE id = $1',
+      'SELECT id, name, description, owner_id AS "ownerId", created_at AS "createdAt", updated_at AS "updatedAt" FROM categories WHERE id = $1',
       [id],
     );
     return mapCategory(rows[0]);
   }
 
-  async list({ search = '', limit = null } = {}) {
+  async list({ search = '', limit = null, ownerId = null } = {}) {
     const { rows } = await pool.query(
-      `SELECT id, name, description, created_at AS "createdAt", updated_at AS "updatedAt"
+      `SELECT id, name, description, owner_id AS "ownerId", created_at AS "createdAt", updated_at AS "updatedAt"
        FROM categories
        WHERE ($1 = '' OR name ILIKE $2)
+         AND ($4::uuid IS NULL OR owner_id = $4)
        ORDER BY name ASC
        LIMIT $3`,
-      [search, `%${search}%`, limit],
+      [search, `%${search}%`, limit, ownerId],
     );
     return rows.map(mapCategory);
   }
@@ -40,8 +42,8 @@ class PostgresCategoryRepository {
 
   async create(category) {
     const { rows } = await pool.query(
-      'INSERT INTO categories (name, description) VALUES ($1, $2) RETURNING *',
-      [category.name, category.description],
+      'INSERT INTO categories (name, description, owner_id) VALUES ($1, $2, $3) RETURNING *',
+      [category.name, category.description, category.ownerId],
     );
     return mapCategory(rows[0]);
   }

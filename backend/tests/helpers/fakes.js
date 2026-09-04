@@ -88,8 +88,8 @@ class MemoryCategoryRepository {
     ];
   }
   async findById(id) { return this.categories.find((category) => category.id === id) || null; }
-  async list({ search = '', limit } = {}) {
-    const matches = this.categories.filter((category) => category.name.toLowerCase().includes(search.toLowerCase()));
+  async list({ search = '', limit, ownerId = null } = {}) {
+    const matches = this.categories.filter((category) => category.name.toLowerCase().includes(search.toLowerCase()) && (!ownerId || category.ownerId === ownerId));
     return limit ? matches.slice(0, limit) : matches;
   }
   async findByName(name) { return this.categories.find((category) => category.name.toLowerCase() === name.toLowerCase()) || null; }

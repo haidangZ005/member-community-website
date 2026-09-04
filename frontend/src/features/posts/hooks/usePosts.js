@@ -21,9 +21,26 @@ export function useCreateCategory() {
     mutationFn: postApi.createCategory,
     onSuccess: (category) => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
+      queryClient.invalidateQueries({ queryKey: ['my-categories'] });
       navigate(`/posts?categoryId=${encodeURIComponent(category.id)}`);
     },
   });
+}
+
+export function useMyCategories() {
+  return useQuery({ queryKey: ['my-categories'], queryFn: () => postApi.categories({ mine: 'true' }) });
+}
+
+export function useManageCategory() {
+  const queryClient = useQueryClient();
+  const refresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['categories'] });
+    queryClient.invalidateQueries({ queryKey: ['my-categories'] });
+  };
+  return {
+    update: useMutation({ mutationFn: postApi.updateCategory, onSuccess: refresh }),
+    remove: useMutation({ mutationFn: postApi.deleteCategory, onSuccess: refresh }),
+  };
 }
 
 export function useCreatePost() {

@@ -19,6 +19,7 @@ const createCommentSchema = z.object({
 }).strict();
 
 const postIdSchema = z.object({ id: z.uuid('Mã bài viết không hợp lệ') });
+const categoryIdSchema = z.object({ id: z.uuid('Mã cộng đồng không hợp lệ') });
 const listPostsSchema = z.object({
   page: z.coerce.number().int().positive('Trang phải lớn hơn 0').optional(),
   limit: z.coerce.number().int().positive('Số bài mỗi trang phải lớn hơn 0').max(50, 'Tối đa 50 bài mỗi trang').optional(),
@@ -29,6 +30,7 @@ const listCategoriesSchema = z.object({
   id: z.uuid('Chuyên mục không hợp lệ').optional(),
   search: z.string().trim().max(100, 'Từ khóa tối đa 100 ký tự').optional(),
   limit: z.coerce.number().int().positive('Giới hạn phải lớn hơn 0').max(20, 'Tối đa 20 chủ đề').optional(),
+  mine: z.literal('true').optional(),
 });
 
-module.exports = { createPostSchema, updatePostSchema, createCommentSchema, postIdSchema, listPostsSchema, listCategoriesSchema };
+module.exports = { createPostSchema, updatePostSchema, createCommentSchema, postIdSchema, categoryIdSchema, listPostsSchema, listCategoriesSchema };

@@ -1,7 +1,7 @@
 const ValidationError = require('../errors/ValidationError');
 
 class Category {
-  constructor({ id, name, description = null, createdAt, updatedAt }) {
+  constructor({ id, name, description = null, ownerId = null, createdAt, updatedAt }) {
     const normalizedName = name?.trim();
     const normalizedDescription = description?.trim() || null;
     if (!normalizedName || normalizedName.length < 2 || normalizedName.length > 100) {
@@ -13,6 +13,7 @@ class Category {
     this.id = id;
     this.name = normalizedName;
     this.description = normalizedDescription;
+    this.ownerId = ownerId;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
   }
@@ -22,6 +23,7 @@ class Category {
       id: this.id,
       name: this.name,
       description: this.description,
+      ownerId: this.ownerId,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
     };

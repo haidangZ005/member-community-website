@@ -1,7 +1,7 @@
 const express = require('express');
 const asyncHandler = require('../../../shared/utils/asyncHandler');
 const validateRequest = require('../middlewares/validateRequest');
-const { createPostSchema, updatePostSchema, createCommentSchema, postIdSchema, listPostsSchema, listCategoriesSchema } = require('../validators/postValidator');
+const { createPostSchema, updatePostSchema, createCommentSchema, postIdSchema, categoryIdSchema, listPostsSchema, listCategoriesSchema } = require('../validators/postValidator');
 const { categorySchema } = require('../validators/adminValidator');
 
 function makePostRoutes(controller, authMiddleware) {
@@ -9,6 +9,8 @@ function makePostRoutes(controller, authMiddleware) {
   router.use(authMiddleware);
   router.get('/categories', validateRequest(listCategoriesSchema, 'query'), asyncHandler(controller.listCategories));
   router.post('/categories', validateRequest(categorySchema), asyncHandler(controller.createCategory));
+  router.put('/categories/:id', validateRequest(categoryIdSchema, 'params'), validateRequest(categorySchema), asyncHandler(controller.updateCategory));
+  router.delete('/categories/:id', validateRequest(categoryIdSchema, 'params'), asyncHandler(controller.deleteCategory));
   router.get('/', validateRequest(listPostsSchema, 'query'), asyncHandler(controller.list));
   router.post('/', validateRequest(createPostSchema), asyncHandler(controller.create));
   router.get('/:id', validateRequest(postIdSchema, 'params'), asyncHandler(controller.getById));

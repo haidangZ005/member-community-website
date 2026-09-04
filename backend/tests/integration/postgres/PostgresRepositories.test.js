@@ -56,7 +56,8 @@ describeIntegration('PostgreSQL repositories', () => {
     const author = await users.create(new User({
       username: 'repository_author', email: 'author@example.com', passwordHash: 'hashed-password', fullName: 'Tác giả',
     }));
-    const category = await categories.create(new Category({ name: 'Kiểm thử', description: 'Dữ liệu tích hợp' }));
+    const category = await categories.create(new Category({ name: 'Kiểm thử', description: 'Dữ liệu tích hợp', ownerId: author.id }));
+    expect((await categories.list({ ownerId: author.id }))[0].id).toBe(category.id);
     const post = await posts.create(new Post({
       authorId: author.id, categoryId: category.id, title: 'Bài viết kiểm thử repository', content: 'Nội dung được lưu trực tiếp vào PostgreSQL thật.',
     }));

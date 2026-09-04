@@ -63,6 +63,18 @@ describe('Community API', () => {
   test('thành viên tạo cộng đồng và xem bài viết phổ biến', async () => {
     const community = await agent.post('/api/posts/categories').set('Authorization', authorization)
       .send({ name: 'Công nghệ Việt', description: 'Nơi chia sẻ sản phẩm và kiến thức công nghệ.' }).expect(201);
+    expect(community.body.data.ownerId).toBeTruthy();
+    await agent.get('/api/posts/categories').query({ mine: 'true' }).set('Authorization', authorization).expect(200)
+      .expect(({ body }) => expect(body.data.map((item) => item.id)).toEqual([community.body.data.id]));
+    await agent.put(`/api/posts/categories/${community.body.data.id}`).set('Authorization', authorization)
+      .send({ name: 'Công nghệ Việt Nam', description: 'Nơi chia sẻ sản phẩm và kiến thức công nghệ.' }).expect(200);
+
+    const otherAgent = request.agent(app);
+    await otherAgent.post('/api/auth/register').send({ username: 'nguoidungkhac', email: 'other@example.com', password: 'Matkhau123' });
+    const otherLogin = await otherAgent.post('/api/auth/login').send({ email: 'other@example.com', password: 'Matkhau123' });
+    const otherAuthorization = `Bearer ${otherLogin.body.data.accessToken}`;
+    await otherAgent.delete(`/api/posts/categories/${community.body.data.id}`).set('Authorization', otherAuthorization).expect(403);
+
     const first = await agent.post('/api/posts').set('Authorization', authorization)
       .send({ title: 'Bài viết thứ nhất', content: 'Nội dung bài viết thứ nhất trong cộng đồng.', categoryId: community.body.data.id }).expect(201);
     await agent.post('/api/posts').set('Authorization', authorization)
@@ -72,5 +84,8 @@ describe('Community API', () => {
     await agent.get('/api/posts').query({ sort: 'popular' }).set('Authorization', authorization).expect(200)
       .expect(({ body }) => expect(body.data[0].id).toBe(first.body.data.id));
     await agent.get('/api/posts').query({ sort: 'unknown' }).set('Authorization', authorization).expect(422);
+    await agent.delete(`/api/posts/categories/${community.body.data.id}`).set('Authorization', authorization).expect(200);
+    await agent.get('/api/posts/categories').query({ mine: 'true' }).set('Authorization', authorization).expect(200)
+      .expect(({ body }) => expect(body.data).toHaveLength(0));
   });
 });
