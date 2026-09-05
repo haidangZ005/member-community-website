@@ -10,6 +10,7 @@
     "migrate:down": "node-pg-migrate down --migration-file-language sql --migrations-dir src/infrastructure/database/postgres/migrations",
     "seed:admin": "node src/infrastructure/database/postgres/seeds/seedAdmin.js",
     "seed:demo": "node src/infrastructure/database/postgres/seeds/seedDemo.js",
+    "seed:tech": "node src/infrastructure/database/postgres/seeds/seedTech.js",
     "test": "jest --runInBand --coverage",
     "test:unit": "jest tests/unit --runInBand",
     "test:e2e": "jest tests/e2e --runInBand",

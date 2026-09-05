@@ -50,6 +50,26 @@ describe('Community API', () => {
     await agent.get('/api/posts?page=0').set('Authorization', authorization).expect(422);
   });
 
+  test('lưu ảnh cộng đồng, giữ ảnh khi sửa tên và từ chối dữ liệu ảnh không an toàn', async () => {
+    const avatarUrl = 'data:image/jpeg;base64,/9j/2Q==';
+    const created = await agent.post('/api/posts/categories').set('Authorization', authorization)
+      .send({ name: 'Cộng đồng ảnh', avatarUrl }).expect(201);
+    const id = created.body.data.id;
+    expect(created.body.data.avatarUrl).toBe(avatarUrl);
+    await agent.get('/api/posts/categories').query({ id }).set('Authorization', authorization).expect(200)
+      .expect(({ body }) => expect(body.data[0].avatarUrl).toBe(avatarUrl));
+    await agent.put(`/api/posts/categories/${id}`).set('Authorization', authorization)
+      .send({ name: 'Cộng đồng đổi tên' }).expect(200)
+      .expect(({ body }) => expect(body.data.avatarUrl).toBe(avatarUrl));
+    await agent.put(`/api/posts/categories/${id}`).set('Authorization', authorization)
+      .send({ name: 'Cộng đồng đổi tên', avatarUrl: null }).expect(200)
+      .expect(({ body }) => expect(body.data.avatarUrl).toBeNull());
+    for (const invalid of ['javascript:alert(1)', 'data:image/svg+xml;base64,PHN2Zz4=', 'data:image/jpeg;base64,aGVsbG8=', 'x'.repeat(90001)]) {
+      await agent.post('/api/posts/categories').set('Authorization', authorization)
+        .send({ name: 'Ảnh không hợp lệ', avatarUrl: invalid }).expect(422);
+    }
+  });
+
   test('tìm chủ đề theo tên và lấy chủ đề theo id', async () => {
     const search = await agent.get('/api/posts/categories').query({ search: 'hỏi', limit: 1 }).set('Authorization', authorization).expect(200);
     expect(search.body.data).toHaveLength(1);

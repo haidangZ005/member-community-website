@@ -1,7 +1,7 @@
 const ValidationError = require('../errors/ValidationError');
 
 class Category {
-  constructor({ id, name, description = null, ownerId = null, joinedByCurrentUser = false, favoriteByCurrentUser = false, createdAt, updatedAt }) {
+  constructor({ id, name, description = null, avatarUrl = null, ownerId = null, joinedByCurrentUser = false, favoriteByCurrentUser = false, createdAt, updatedAt }) {
     const normalizedName = name?.trim();
     const normalizedDescription = description?.trim() || null;
     if (!normalizedName || normalizedName.length < 2 || normalizedName.length > 100) {
@@ -13,6 +13,16 @@ class Category {
     this.id = id;
     this.name = normalizedName;
     this.description = normalizedDescription;
+    if (avatarUrl !== null) {
+      if (typeof avatarUrl !== 'string' || avatarUrl.length > 90000 || !/^data:image\/jpeg;base64,[A-Za-z0-9+/]+={0,2}$/.test(avatarUrl)) {
+        throw new ValidationError('Ảnh đại diện phải là ảnh JPEG thu nhỏ, tối đa 90.000 ký tự');
+      }
+      const bytes = Buffer.from(avatarUrl.slice(23), 'base64');
+      if (bytes.length < 4 || bytes[0] !== 0xff || bytes[1] !== 0xd8 || bytes.at(-2) !== 0xff || bytes.at(-1) !== 0xd9) {
+        throw new ValidationError('Dữ liệu ảnh đại diện không hợp lệ');
+      }
+    }
+    this.avatarUrl = avatarUrl;
     this.ownerId = ownerId;
     this.joinedByCurrentUser = Boolean(joinedByCurrentUser);
     this.favoriteByCurrentUser = Boolean(favoriteByCurrentUser);
@@ -25,6 +35,7 @@ class Category {
       id: this.id,
       name: this.name,
       description: this.description,
+      avatarUrl: this.avatarUrl,
       ownerId: this.ownerId,
       joinedByCurrentUser: this.joinedByCurrentUser,
       favoriteByCurrentUser: this.favoriteByCurrentUser,

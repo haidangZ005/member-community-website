@@ -14,6 +14,7 @@ const commentModerationListSchema = memberListSchema.extend({ status: z.enum(['v
 const categorySchema = z.object({
   name: z.string().trim().min(2, 'Tên chuyên mục phải có ít nhất 2 ký tự').max(100, 'Tên chuyên mục tối đa 100 ký tự'),
   description: z.string().trim().max(500, 'Mô tả tối đa 500 ký tự').nullable().optional(),
+  avatarUrl: z.string().max(90000, 'Ảnh đại diện quá lớn').nullable().optional(),
 }).strict();
 
 module.exports = { idParamSchema, memberListSchema, postModerationListSchema, commentModerationListSchema, categorySchema };

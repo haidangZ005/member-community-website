@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import LoginPage from '../../pages/auth/LoginPage';
 import RegisterPage from '../../pages/auth/RegisterPage';
 import ForgotPasswordPage from '../../pages/auth/ForgotPasswordPage';
@@ -9,7 +9,7 @@ import PostListPage from '../../pages/posts/PostListPage';
 import PostDetailPage from '../../pages/posts/PostDetailPage';
 import PostEditorPage from '../../pages/posts/PostEditorPage';
 import CreatePostPage from '../../pages/posts/CreatePostPage';
-import CreateCommunityPage from '../../pages/posts/CreateCommunityPage';
+import CreateCommunityDialog from '../../pages/posts/CreateCommunityDialog';
 import ManageCommunitiesPage from '../../pages/posts/ManageCommunitiesPage';
 import AdminRoute from './AdminRoute';
 import AdminLayout from '../../components/admin/AdminLayout';
@@ -20,8 +20,15 @@ import CommentModerationPage from '../../pages/admin/CommentModerationPage';
 import CategoryManagementPage from '../../pages/admin/CategoryManagementPage';
 
 export default function AppRoutes() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const creatingCommunity = location.pathname.replace(/\/$/, '') === '/communities/new';
+  const background = location.state?.backgroundLocation;
+  const closeCommunity = () => background ? navigate(-1) : navigate('/posts', { replace: true });
+
   return (
-    <Routes>
+    <>
+    <Routes location={creatingCommunity ? background || '/posts' : location}>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -29,7 +36,6 @@ export default function AppRoutes() {
       <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
       <Route path="/posts" element={<ProtectedRoute><PostListPage /></ProtectedRoute>} />
       <Route path="/posts/new" element={<ProtectedRoute><CreatePostPage /></ProtectedRoute>} />
-      <Route path="/communities/new" element={<ProtectedRoute><CreateCommunityPage /></ProtectedRoute>} />
       <Route path="/communities/manage" element={<ProtectedRoute><ManageCommunitiesPage /></ProtectedRoute>} />
       <Route path="/posts/:id" element={<ProtectedRoute><PostDetailPage /></ProtectedRoute>} />
       <Route path="/posts/:id/edit" element={<ProtectedRoute><PostEditorPage /></ProtectedRoute>} />
@@ -42,5 +48,7 @@ export default function AppRoutes() {
       </Route>
       <Route path="*" element={<Navigate to="/posts" replace />} />
     </Routes>
+    {creatingCommunity && <ProtectedRoute><CreateCommunityDialog onClose={closeCommunity} /></ProtectedRoute>}
+    </>
   );
 }

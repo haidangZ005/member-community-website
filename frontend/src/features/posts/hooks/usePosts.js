@@ -22,7 +22,7 @@ export function useCreateCategory() {
     onSuccess: (category) => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       queryClient.invalidateQueries({ queryKey: ['my-categories'] });
-      navigate(`/posts?categoryId=${encodeURIComponent(category.id)}`);
+      navigate(`/posts?categoryId=${encodeURIComponent(category.id)}`, { replace: true });
     },
   });
 }

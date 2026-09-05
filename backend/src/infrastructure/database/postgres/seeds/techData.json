@@ -1,0 +1,59 @@
+{
+  "collectedOn": "2026-09-05",
+  "method": "Tóm lược tiếng Việt từ các bài Reddit công khai được tìm qua công cụ tìm kiếm; không phải bản sao đầy đủ hay luồng đồng bộ trực tiếp.",
+  "categories": [
+    { "name": "ThinkPad", "description": "Thảo luận về laptop ThinkPad, phần cứng, nâng cấp và trải nghiệm sử dụng." },
+    { "name": "Framework", "description": "Laptop mô-đun, khả năng sửa chữa và những câu chuyện nâng cấp máy tính Framework." },
+    { "name": "Linux", "description": "Chia sẻ trải nghiệm Linux, môi trường desktop và phần mềm nguồn mở." }
+  ],
+  "posts": [
+    {
+      "id": "13cf4f44-dce5-4649-af2a-37ffb5c91101",
+      "category": "ThinkPad",
+      "title": "ThinkPad T480: chọn Windows hay Linux khi quan tâm đến pin?",
+      "summary": "Một người dùng T480 hỏi về thời lượng pin sau khi thử nhiều bản Windows. Phần thảo luận chia sẻ các trải nghiệm Linux khác nhau, đồng thời nhắc đến tình trạng pin và firmware. Đây là kinh nghiệm cá nhân trong bài nguồn, không phải kết quả đo trên cùng một cấu hình.",
+      "sourceTitle": "T480 windows or linux?",
+      "sourceUrl": "https://www.reddit.com/r/thinkpad/comments/1sbjojm/t480_windows_or_linux/"
+    },
+    {
+      "id": "13cf4f44-dce5-4649-af2a-37ffb5c91102",
+      "category": "ThinkPad",
+      "title": "T480 với Linux cho việc học lập trình: mọi người đang dùng bản nào?",
+      "summary": "Bài thảo luận hỏi về hiệu năng và thời lượng pin của T480 chạy Linux để phục vụ việc học khoa học máy tính. Một thành viên chia sẻ việc thử Arch, Fedora và Tuxedo OS với KDE trên các máy T480 của mình. Cấu hình và tình trạng pin có thể khiến trải nghiệm khác nhau.",
+      "sourceTitle": "Thinkpad T480 with Linux setups?",
+      "sourceUrl": "https://www.reddit.com/r/thinkpad/comments/1i68c50/"
+    },
+    {
+      "id": "13cf4f44-dce5-4649-af2a-37ffb5c91103",
+      "category": "Framework",
+      "title": "Framework: khả năng sửa chữa hay nâng cấp mới là điều đáng giá?",
+      "summary": "Người mở bài đặt câu hỏi liệu khả năng nâng cấp có thực sự quan trọng khi một laptop có thể dùng nhiều năm. Các bình luận mở rộng câu chuyện sang khả năng thay thế linh kiện hỏng và những kỳ vọng về tương thích lâu dài. Bài nguồn thể hiện nhiều quan điểm, không phải cam kết hỗ trợ của nhà sản xuất.",
+      "sourceTitle": "Is framework upgradability really worth it?",
+      "sourceUrl": "https://www.reddit.com/r/framework/comments/1cqa8eb/"
+    },
+    {
+      "id": "13cf4f44-dce5-4649-af2a-37ffb5c91104",
+      "category": "Framework",
+      "title": "Hỏi đáp về tương thích linh kiện giữa các đời Framework Laptop 13",
+      "summary": "Một megathread tập hợp câu hỏi về nâng cấp và tương thích khi Framework Laptop 13 Pro được giới thiệu. Người tham gia quan tâm đến mainboard, màn hình, pin và vỏ máy. Khi nâng cấp thực tế, cần đối chiếu tài liệu chính thức cho đúng đời linh kiện; không nên hiểu rằng mọi bộ phận đều thay thế qua lại được.",
+      "sourceTitle": "[MEGATHREAD] Compatibility/Upgrade for Framework Laptop 13 Pro",
+      "sourceUrl": "https://www.reddit.com/r/framework/comments/1ssudq5/megathread_compatibilityupgrade_for_framework/"
+    },
+    {
+      "id": "13cf4f44-dce5-4649-af2a-37ffb5c91105",
+      "category": "Linux",
+      "title": "Linux trên laptop: trải nghiệm desktop đã thay đổi như thế nào?",
+      "summary": "Bài viết chia sẻ trải nghiệm tích cực khi dùng Linux trên laptop trong năm 2025, nhắc đến Ubuntu, Wayland và đồ họa lai. Tác giả cho biết đã chuyển từ thử nghiệm dual boot sang dùng Ubuntu làm hệ thống chính cho công việc phát triển game. Đây là trải nghiệm trên máy của tác giả, không đại diện cho mọi laptop.",
+      "sourceTitle": "Linux in 2025 (for laptops)",
+      "sourceUrl": "https://www.reddit.com/r/linux/comments/1lypkpt/"
+    },
+    {
+      "id": "13cf4f44-dce5-4649-af2a-37ffb5c91106",
+      "category": "Linux",
+      "title": "Có cần chờ một “năm của Linux desktop” mới bắt đầu sử dụng?",
+      "summary": "Trong cuộc thảo luận về năm của Linux desktop, nhiều bình luận cho rằng việc chuyển đổi đã diễn ra từ lâu và phụ thuộc vào nhu cầu của từng người. Một số thành viên kể rằng họ đã dùng Linux Mint hoặc Linux nhiều năm. Chủ đề gợi mở câu hỏi: điều gì sẽ khiến bạn chọn Linux cho chiếc máy hằng ngày?",
+      "sourceTitle": "2025 is the year of the Linux desktop",
+      "sourceUrl": "https://www.reddit.com/r/linux/comments/1hbgfnd/"
+    }
+  ]
+}

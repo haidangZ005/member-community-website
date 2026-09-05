@@ -7,6 +7,7 @@ function mapCategory(row) {
     id: row.id,
     name: row.name,
     description: row.description,
+    avatarUrl: row.avatar_url ?? row.avatarUrl ?? null,
     ownerId: row.owner_id ?? row.ownerId,
     joinedByCurrentUser: row.joined_by_current_user ?? row.joinedByCurrentUser,
     favoriteByCurrentUser: row.favorite_by_current_user ?? row.favoriteByCurrentUser,
@@ -18,7 +19,7 @@ function mapCategory(row) {
 class PostgresCategoryRepository {
   async findById(id, viewerId = null) {
     const { rows } = await pool.query(
-      `SELECT c.id, c.name, c.description, c.owner_id AS "ownerId", c.created_at AS "createdAt", c.updated_at AS "updatedAt",
+      `SELECT c.id, c.name, c.description, c.avatar_url, c.owner_id AS "ownerId", c.created_at AS "createdAt", c.updated_at AS "updatedAt",
               (cm.user_id IS NOT NULL) AS "joinedByCurrentUser", COALESCE(cm.is_favorite, FALSE) AS "favoriteByCurrentUser"
        FROM categories c
        LEFT JOIN community_memberships cm ON cm.category_id = c.id AND cm.user_id = $2::uuid
@@ -30,7 +31,7 @@ class PostgresCategoryRepository {
 
   async list({ search = '', limit = null, ownerId = null, viewerId = null, joinedOnly = false, favoritesOnly = false } = {}) {
     const { rows } = await pool.query(
-      `SELECT c.id, c.name, c.description, c.owner_id AS "ownerId", c.created_at AS "createdAt", c.updated_at AS "updatedAt",
+      `SELECT c.id, c.name, c.description, c.avatar_url, c.owner_id AS "ownerId", c.created_at AS "createdAt", c.updated_at AS "updatedAt",
               (cm.user_id IS NOT NULL) AS "joinedByCurrentUser", COALESCE(cm.is_favorite, FALSE) AS "favoriteByCurrentUser"
        FROM categories c
        LEFT JOIN community_memberships cm ON cm.category_id = c.id AND cm.user_id = $5::uuid
@@ -53,21 +54,21 @@ class PostgresCategoryRepository {
   async create(category) {
     const { rows } = await pool.query(
       `WITH created AS (
-         INSERT INTO categories (name, description, owner_id) VALUES ($1, $2, $3) RETURNING *
+         INSERT INTO categories (name, description, owner_id, avatar_url) VALUES ($1, $2, $3, $4) RETURNING *
        ), joined AS (
          INSERT INTO community_memberships (user_id, category_id)
          SELECT owner_id, id FROM created WHERE owner_id IS NOT NULL
        )
        SELECT * FROM created`,
-      [category.name, category.description, category.ownerId],
+      [category.name, category.description, category.ownerId, category.avatarUrl],
     );
     return this.findById(rows[0].id, category.ownerId);
   }
 
   async update(id, category) {
     const { rows } = await pool.query(
-      'UPDATE categories SET name = $2, description = $3 WHERE id = $1 RETURNING *',
-      [id, category.name, category.description],
+      'UPDATE categories SET name = $2, description = $3, avatar_url = $4 WHERE id = $1 RETURNING *',
+      [id, category.name, category.description, category.avatarUrl],
     );
     return mapCategory(rows[0]);
   }

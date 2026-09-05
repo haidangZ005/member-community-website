@@ -72,6 +72,22 @@ Remove-Item Env:DEMO_PASSWORD
 
 Các tài khoản demo được in ra sau khi seed. Chạy lại lệnh sẽ làm mới dữ liệu của chính các tài khoản demo, không xóa dữ liệu người dùng khác.
 
+### Bổ sung dữ liệu công nghệ
+
+Sau khi chạy migration, thêm 3 cộng đồng **ThinkPad, Framework, Linux** và 6 bài mẫu:
+
+```powershell
+npm run seed:tech --prefix backend
+```
+
+Lệnh này chỉ thêm dữ liệu còn thiếu: chạy lại không nhân đôi bài, không xóa bài cũ, không đổi mật khẩu hay ghi đè nội dung đã sửa. Không cần `DEMO_PASSWORD`. Tài khoản “VRUM · Demo công nghệ” chỉ để trình bày nguồn tổng hợp, có mật khẩu ngẫu nhiên được băm bcrypt và không dùng để đăng nhập thử.
+
+Dữ liệu là các bản tóm lược tiếng Việt từ bài công khai trên Reddit, được tìm qua công cụ tìm kiếm ngày 05/09/2026 (endpoint JSON không tải được). Mỗi bài ghi tên bài gốc và URL nguồn; không sao chép người dùng, ảnh, lượt thích hay bình luận. Đây là snapshot nhỏ để demo, không phải crawler hoặc dữ liệu cập nhật trực tiếp. Danh sách nguồn nằm trong `backend/src/infrastructure/database/postgres/seeds/techData.json`.
+
+Trong giao diện, chọn **Bắt đầu một cộng đồng** để mở cửa sổ tạo ngay trên trang hiện tại, nhập tên/mô tả và xem trước. Nhấn **Hủy**, nút **×** hoặc **Esc** để đóng; tạo thành công sẽ mở cộng đồng vừa tạo.
+
+Có thể chọn **ảnh đại diện** JPG/PNG/WebP tối đa 5 MB. Trình duyệt cắt vuông phần giữa, thu nhỏ thành JPEG 256 × 256 rồi lưu cùng cộng đồng; ảnh hiển thị tại trang cộng đồng, mục Gần đây và Quản lý cộng đồng. Nếu chưa chọn ảnh, giao diện dùng biểu tượng nhóm thay cho chữ cái đầu. Khi cập nhật code, chạy `npm run migrate:up --prefix backend` để thêm cột ảnh (migration 010); các cộng đồng cũ vẫn hoạt động. Rollback migration 010 chỉ bỏ cột ảnh, nên sao lưu ảnh trước nếu cần quay lui.
+
 ## Chạy toàn bộ bằng Docker
 
 Đảm bảo cổng `5432`, `4000` và `5173` chưa được chương trình khác sử dụng:
